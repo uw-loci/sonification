@@ -12,7 +12,7 @@
 //  Created by Hanns Holger Rutz on 10.09.05.
 //
 
-package de.sciss.jcollider.test;
+package sonification;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -111,7 +111,8 @@ implements FileFilter, ServerListener, Constants
 	protected NodeWatcher	nw		= null;
 	protected Group			grpAll;
 	
-	private static final String[] tableNames = { "JCollider", "Drop Zone" };
+	//private static final String[] tableNames = { "JCollider", "Drop Zone" };
+	private static final String[] tableNames = {"JCollider"};
 
 	protected final Demo enc_this	= this;
 	
@@ -128,8 +129,8 @@ implements FileFilter, ServerListener, Constants
 		JLabel				lb;
 		JFrame				spf			= null;
 		
-		defTables = new SynthDefTable[ 2 ];
-		for( int i = 0; i < 2; i++ ) {
+		defTables = new SynthDefTable[ 1 ];
+		for( int i = 0; i < 1; i++ ) {
 			defTables[ i ]	= new SynthDefTable( tableNames[ i ]);
 			ggScroll		= new JScrollPane( defTables[ i ]);
 			b.add( ggScroll );
@@ -174,8 +175,8 @@ implements FileFilter, ServerListener, Constants
 			});
 			lb = new JLabel( "Server App Path :" );
 			lb.setBorder( BorderFactory.createEmptyBorder( 2, 6, 2, 4 ));
-			b2.add( lb );
-			b2.add( ggAppPath );
+			//b2.add( lb );
+			//b2.add( ggAppPath );
 			cp.add( b2, BorderLayout.NORTH );
 			cp.add( createButtons(), BorderLayout.SOUTH );
 

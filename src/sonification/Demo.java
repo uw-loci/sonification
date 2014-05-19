@@ -409,37 +409,37 @@ implements FileFilter, ServerListener, Constants
 	
 // ------------- internal classes -------------
 	
-//	private abstract class DemoDefs
-//	{
-//		private java.util.List create()
-//		{
-//			final java.util.List result = new ArrayList();
-//			final Random rnd = new Random(System.currentTimeMillis());
-//			SynthDef def;
-//			GraphElem f,g,h;
-//			
-//			{
-//				GraphElem	clockRate	= UGen.kr( "MouseX", UGen.ir( 1 ), UGen.ir( 200 ), UGen.ir( 1 ));
-//				GraphElem	clockTime	= UGen.kr( "reciprocal", clockRate );
-//				GraphElem	clock		= UGen.kr( "Impulse", clockRate, UGen.ir( 0.4f ));
-//				GraphElem	centerFreq	= UGen.kr( "MouseY", UGen.ir( 100 ), UGen.ir( 8000 ), UGen.ir( 1 ));
-//				GraphElem	freq		= UGen.kr( "Latch", UGen.kr( "MulAdd", UGen.kr( "WhiteNoise" ),
-//											UGen.kr( "*", centerFreq, UGen.ir( 0.5f )), centerFreq ), clock );
-//				GraphElem	panPos		= UGen.kr( "Latch", UGen.kr( "WhiteNoise" ), clock );
-//
-//				f	= UGen.ar( "*", UGen.ar( "SinOsc", freq ), UGen.kr( "Decay2", clock,
-//						UGen.kr( "*", UGen.ir( 0.1f ), clockTime ), UGen.kr( "*", UGen.ir( 0.9f ), clockTime )));
-//				g	= UGen.ar( "Pan2", f, panPos );
-//				h	= UGen.ar( "CombN", g, UGen.ir( 0.3f ), UGen.ir( 0.3f ), UGen.ir( 2 ));
-//				def = new SynthDef( "JSampleAndHoldLiquid", UGen.ar( "Out", UGen.ir( 0 ), h ));
-//				result.add( def );
-//			}
-//			
-//			return result;
-//		}
-//		
-//		
-//	}
+	private abstract static class DemoDefs
+	{
+		private static java.util.List create()
+		{
+			final java.util.List result = new ArrayList();
+			final Random rnd = new Random(System.currentTimeMillis());
+			SynthDef def;
+			GraphElem f,g,h;
+			
+			{
+				GraphElem	clockRate	= UGen.kr( "MouseX", UGen.ir( 1 ), UGen.ir( 200 ), UGen.ir( 1 ));
+				GraphElem	clockTime	= UGen.kr( "reciprocal", clockRate );
+				GraphElem	clock		= UGen.kr( "Impulse", clockRate, UGen.ir( 0.4f ));
+				GraphElem	centerFreq	= UGen.kr( "MouseY", UGen.ir( 100 ), UGen.ir( 8000 ), UGen.ir( 1 ));
+				GraphElem	freq		= UGen.kr( "Latch", UGen.kr( "MulAdd", UGen.kr( "WhiteNoise" ),
+											UGen.kr( "*", centerFreq, UGen.ir( 0.5f )), centerFreq ), clock );
+				GraphElem	panPos		= UGen.kr( "Latch", UGen.kr( "WhiteNoise" ), clock );
+
+				f	= UGen.ar( "*", UGen.ar( "SinOsc", freq ), UGen.kr( "Decay2", clock,
+						UGen.kr( "*", UGen.ir( 0.1f ), clockTime ), UGen.kr( "*", UGen.ir( 0.9f ), clockTime )));
+				g	= UGen.ar( "Pan2", f, panPos );
+				h	= UGen.ar( "CombN", g, UGen.ir( 0.3f ), UGen.ir( 0.3f ), UGen.ir( 2 ));
+				def = new SynthDef( "JSampleAndHoldLiquid", UGen.ar( "Out", UGen.ir( 0 ), h ));
+				result.add( def );
+			}
+			
+			return result;
+		}
+		
+		
+	}
 	
 	private static class SynthDefTable
 	extends JTable
@@ -617,83 +617,83 @@ implements FileFilter, ServerListener, Constants
 		}
 	}
 
-	private class ActionDiagram
-	extends AbstractAction
-	{
-		protected ActionDiagram()
-		{
-			super( "Def Diagram" );			
-		}
+//	private class ActionDiagram
+//	extends AbstractAction
+//	{
+//		protected ActionDiagram()
+//		{
+//			super( "Def Diagram" );			
+//		}
+//	
+//		public void actionPerformed( ActionEvent e )
+//		{
+//			if( selectedTable == null ) return;
+//			
+//			final SynthDef def = selectedTable.getSelectedDef();
+//			if( def != null ) {
+//				new SynthDefDiagram( def );
+//			}
+//		}
+//	}
 	
-		public void actionPerformed( ActionEvent e )
-		{
-			if( selectedTable == null ) return;
-			
-			final SynthDef def = selectedTable.getSelectedDef();
-			if( def != null ) {
-				new SynthDefDiagram( def );
-			}
-		}
-	}
-	
-	private class ActionDump
-	extends AbstractAction
-	{
-		protected ActionDump()
-		{
-			super( "Def Dump" );			
-		}
-	
-		public void actionPerformed( ActionEvent e )
-		{
-			if( selectedTable == null ) return;
-			
-			final SynthDef def = selectedTable.getSelectedDef();
-			if( def != null ) {
-				def.printOn( System.out );
-			}
-		}
-	}
+//	private class ActionDump
+//	extends AbstractAction
+//	{
+//		protected ActionDump()
+//		{
+//			super( "Def Dump" );			
+//		}
+//	
+//		public void actionPerformed( ActionEvent e )
+//		{
+//			if( selectedTable == null ) return;
+//			
+//			final SynthDef def = selectedTable.getSelectedDef();
+//			if( def != null ) {
+//				def.printOn( System.out );
+//			}
+//		}
+//	}
 
-	private class ActionSynthDefApiEx
-	extends AbstractAction
-	{
-		protected ActionSynthDefApiEx()
-		{
-			super( "API Ex" );			
-		}
-	
-		public void actionPerformed( ActionEvent e )
-		{
-			DemoDefs.synthDefApiExample( server );	// doesn't inform nodewatcher though
-		}
-	}
+//	private class ActionSynthDefApiEx
+//	extends AbstractAction
+//	{
+//		protected ActionSynthDefApiEx()
+//		{
+//			super( "API Ex" );
+//		}
+//	
+//		public void actionPerformed( ActionEvent e )
+//		{
+//			DemoDefs.synthDefApiExample( server );	// doesn't inform nodewatcher though
+//		}
+//	}
 
-	private class ActionNodeTree
-	extends AbstractAction
-	{
-		protected ActionNodeTree()
-		{
-			super( "Node Tree" );			
-		}
-	
-		public void actionPerformed( ActionEvent e )
-		{
-			if( (server == null) || (nw == null) || (grpAll == null) ) return;
-		
-			final NodeTreePanel		ntp			= new NodeTreePanel( nw, grpAll );
-			final JFrame			treeFrame	= ntp.makeWindow();
-			
-			treeFrame.addWindowListener( new WindowAdapter() {
-				public void windowClosing( WindowEvent e )
-				{
-					treeFrame.setVisible( false );
-					treeFrame.dispose();
-					ntp.dispose();
-				}
-			});
-		}
-	}
+//	private class ActionNodeTree
+//	extends AbstractAction
+//	{
+//		protected ActionNodeTree()
+//		{
+//			super( "Node Tree" );			
+//		}
+//	
+//		public void actionPerformed( ActionEvent e )
+//		{
+//			if( (server == null) || (nw == null) || (grpAll == null) ) return;
+//		
+//			final NodeTreePanel		ntp			= new NodeTreePanel( nw, grpAll );
+//			final JFrame			treeFrame	= ntp.makeWindow();
+//			
+//			treeFrame.addWindowListener( new WindowAdapter() {
+//				public void windowClosing( WindowEvent e )
+//				{
+//					treeFrame.setVisible( false );
+//					treeFrame.dispose();
+//					ntp.dispose();
+//				}
+//			});
+//		}
+//	}
 
 	private static class SynthDefNameComp
 	implements Comparator

@@ -27,6 +27,8 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -262,18 +264,18 @@ implements FileFilter, ServerListener, Constants
 		but = new JButton( new ActionStop() );
 		but.setToolTipText( "Stop All Synths" );
 		b.add( but );
-		but = new JButton( new ActionDiagram() );
-		but.setToolTipText( "Open Diagram For Selected SynthDef" );
-		b.add( but );
-		but = new JButton( new ActionDump() );
-		but.setToolTipText( "Dump Selected SynthDef To The System Console" );
-		b.add( but );
-		but = new JButton( new ActionSynthDefApiEx() );
-		but.setToolTipText( "Demo code from SynthDef API doc" );
-		b.add( but );
-		but = new JButton( new ActionNodeTree() );
-		but.setToolTipText( "View a Tree of all Nodes" );
-		b.add( but );
+		//but = new JButton( new ActionDiagram() );
+		//but.setToolTipText( "Open Diagram For Selected SynthDef" );
+		//b.add( but );
+		//but = new JButton( new ActionDump() );
+		//but.setToolTipText( "Dump Selected SynthDef To The System Console" );
+		//b.add( but );
+		//but = new JButton( new ActionSynthDefApiEx() );
+		//but.setToolTipText( "Demo code from SynthDef API doc" );
+		//b.add( but );
+		//but = new JButton( new ActionNodeTree() );
+		//but.setToolTipText( "View a Tree of all Nodes" );
+		//b.add( but );
 		
 		return b;
 	}
@@ -406,6 +408,38 @@ implements FileFilter, ServerListener, Constants
 	}
 	
 // ------------- internal classes -------------
+	
+//	private abstract class DemoDefs
+//	{
+//		private java.util.List create()
+//		{
+//			final java.util.List result = new ArrayList();
+//			final Random rnd = new Random(System.currentTimeMillis());
+//			SynthDef def;
+//			GraphElem f,g,h;
+//			
+//			{
+//				GraphElem	clockRate	= UGen.kr( "MouseX", UGen.ir( 1 ), UGen.ir( 200 ), UGen.ir( 1 ));
+//				GraphElem	clockTime	= UGen.kr( "reciprocal", clockRate );
+//				GraphElem	clock		= UGen.kr( "Impulse", clockRate, UGen.ir( 0.4f ));
+//				GraphElem	centerFreq	= UGen.kr( "MouseY", UGen.ir( 100 ), UGen.ir( 8000 ), UGen.ir( 1 ));
+//				GraphElem	freq		= UGen.kr( "Latch", UGen.kr( "MulAdd", UGen.kr( "WhiteNoise" ),
+//											UGen.kr( "*", centerFreq, UGen.ir( 0.5f )), centerFreq ), clock );
+//				GraphElem	panPos		= UGen.kr( "Latch", UGen.kr( "WhiteNoise" ), clock );
+//
+//				f	= UGen.ar( "*", UGen.ar( "SinOsc", freq ), UGen.kr( "Decay2", clock,
+//						UGen.kr( "*", UGen.ir( 0.1f ), clockTime ), UGen.kr( "*", UGen.ir( 0.9f ), clockTime )));
+//				g	= UGen.ar( "Pan2", f, panPos );
+//				h	= UGen.ar( "CombN", g, UGen.ir( 0.3f ), UGen.ir( 0.3f ), UGen.ir( 2 ));
+//				def = new SynthDef( "JSampleAndHoldLiquid", UGen.ar( "Out", UGen.ir( 0 ), h ));
+//				result.add( def );
+//			}
+//			
+//			return result;
+//		}
+//		
+//		
+//	}
 	
 	private static class SynthDefTable
 	extends JTable

@@ -305,9 +305,10 @@ implements FileFilter, ServerListener, Constants, PlugIn
 		//IJ.run(imp, "Invert", "");
 
 		SwingUtilities.invokeLater( new Runnable() {
+			
 			public void run()
 			{
-				new My_Plugin().initialize();				
+				initialize();				
 			}
 		});
 
@@ -319,21 +320,21 @@ implements FileFilter, ServerListener, Constants, PlugIn
 
 		IJ.log("Creating Defs");
 		//IJ.handleException(new Exception("stacktrace"));
-		//try {
+		try {
 //			UGenInfo.readDefinitions();
-			//UGenInfo.readBinaryDefinitions();
+			UGenInfo.readBinaryDefinitions();
 
 			final List collDefs = My_PluginDefs.create();
 			Collections.sort( collDefs, synthDefNameComp );
 //			defTables[ 1 ].addDefs( collDefs );
 			defTables[ 0 ].addDefs( collDefs );
-		//}
-//		catch( IOException e1 ) {
-//
-//			IJ.handleException(e1);
-//			//e1.printStackTrace();
-////			reportError( e1 );
-//		}
+		}
+		catch( IOException e1 ) {
+
+			IJ.handleException(e1);
+			//e1.printStackTrace();
+//			reportError( e1 );
+		}
 	}
 
 	private void initServer()
@@ -383,16 +384,13 @@ implements FileFilter, ServerListener, Constants, PlugIn
 		return null;
 	}
 
-//    public static void main( String args[] )
-//	{
-//    	System.out.println("Path="+System.getenv("PATH"));
-//		SwingUtilities.invokeLater( new Runnable() {
-//			public void run()
-//			{
-//				new My_Plugin();
-//			}
-//		});
-//	}
+    public static void main( String args[] )
+	{
+    	System.out.println("Path="+System.getenv("PATH"));
+    	new ImageJ();
+    	new My_Plugin().run("");
+    	
+	}
 
 	protected static void reportError( Exception e ) {
 		System.err.println( e.getClass().getName() + " : " + e.getLocalizedMessage() );

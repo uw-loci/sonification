@@ -1,18 +1,28 @@
+
+
 //
-//  Demo.java
+//  My_Plugin.java
 //
-//	This demonstrates some features of JCollider. This demo
+//	This My_Pluginnstrates some features of JCollider. This My_Plugin
 //	class is absolutely free and comes with absolutely no
 //	warranties. JColider itself is released under the GNU GPL
 //	(see separate license file).
 //
 //	To launch the compiled class, CD into the JColider folder
-//	and run the JSuperColiderDemo.sh shell script.
+//	and run the JSuperColiderMy_Plugin.sh shell script.
 //
 //  Created by Hanns Holger Rutz on 10.09.05.
 //
 
-package sonification;
+//package sonification;
+
+import ij.*;
+import ij.process.*;
+import ij.gui.*;
+//import java.awt.*;
+import ij.plugin.*;
+import ij.plugin.frame.*;
+import javax.swing.WindowConstants;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -56,7 +66,7 @@ import de.sciss.jcollider.*;
 import de.sciss.jcollider.gui.*;
 
 /**
- *	This class demonstrates some
+ *	This class My_Pluginnstrates some
  *	of JCollider's features, namely
  *	loading and building synth defs,
  *	along with instantiating and
@@ -88,9 +98,9 @@ import de.sciss.jcollider.gui.*;
  *	@version	0.32, 25-Feb-08
  *	@author		Hanns Holger Rutz
  *
- *	@todo		the demo and the NodeWatcher get irritated if
+ *	@todo		the My_Plugin and the NodeWatcher get irritated if
  *				a server is already running and containing
- *				nodes when the demo is launched
+ *				nodes when the My_Plugin is launched
  *	@todo		quitting the application from the apple menu
  *				will not perform clean-ups, notably the server
  *				will not be shut down. please use main window's
@@ -98,13 +108,13 @@ import de.sciss.jcollider.gui.*;
  *	@todo		should be possible to drag + drop nodes in
  *				the tree panel, create subgroups etc.
  */
-public class Demo
+public class My_Plugin
 extends JFrame
-implements FileFilter, ServerListener, Constants
+implements FileFilter, ServerListener, Constants, PlugIn
 {
 	public static Font	fntGUI	= ServerPanel.fntGUI;
 
-	protected final SynthDefTable[] defTables;
+	protected final SynthDefTable[] defTables = new SynthDefTable[ 1 ];
 	protected SynthDefTable selectedTable	= null;
 	
 	protected static final Comparator synthDefNameComp = new SynthDefNameComp();
@@ -116,13 +126,15 @@ implements FileFilter, ServerListener, Constants
 	//private static final String[] tableNames = { "JCollider", "Drop Zone" };
 	private static final String[] tableNames = {"JCollider"};
 
-	protected final Demo enc_this	= this;
+	protected final My_Plugin enc_this	= this;
 	
-	public Demo()
+	public My_Plugin()
 	{
+		super( "JCollider My_Plugin" );
+	}
 
-		super( "JCollider Demo" );
-
+	public void initialize()
+	{
 		final Box			b			= Box.createHorizontalBox();
 		final Box			b2			= Box.createHorizontalBox();
 		final Container		cp			= getContentPane();
@@ -132,7 +144,6 @@ implements FileFilter, ServerListener, Constants
 		JLabel				lb;
 		JFrame				spf			= null;
 		
-		defTables = new SynthDefTable[ 1 ];
 		for( int i = 0; i < 1; i++ ) {
 			defTables[ i ]	= new SynthDefTable( tableNames[ i ]);
 			ggScroll		= new JScrollPane( defTables[ i ]);
@@ -193,6 +204,7 @@ implements FileFilter, ServerListener, Constants
 			catch( IOException e1 ) { /* ignored */ }
 //			if( server.isRunning() ) initServer();
 			spf = ServerPanel.makeWindow( server, ServerPanel.MIMIC | ServerPanel.CONSOLE | ServerPanel.DUMP );
+			spf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		}
 		catch( IOException e1 ) {
 			JOptionPane.showMessageDialog( this, "Failed to create a server :\n" + e1.getClass().getName() +
@@ -218,9 +230,11 @@ implements FileFilter, ServerListener, Constants
 						reportError( e1 );
 					}
 				}
-				setVisible( false );
-				dispose();
-				System.exit( 0 );
+
+				IJ.log("disposing server window: " + e.getWindow());
+				e.getWindow().setVisible( false );
+				e.getWindow().dispose();
+				//System.exit( 0 );
 			}
 		});
 		
@@ -275,7 +289,7 @@ implements FileFilter, ServerListener, Constants
 		//but.setToolTipText( "Dump Selected SynthDef To The System Console" );
 		//b.add( but );
 		//but = new JButton( new ActionSynthDefApiEx() );
-		//but.setToolTipText( "Demo code from SynthDef API doc" );
+		//but.setToolTipText( "My_Plugin code from SynthDef API doc" );
 		//b.add( but );
 		//but = new JButton( new ActionNodeTree() );
 		//but.setToolTipText( "View a Tree of all Nodes" );
@@ -284,21 +298,42 @@ implements FileFilter, ServerListener, Constants
 		return b;
 	}
 	
+	public void run(String arg) {
+		//ImagePlus imp = IJ.getImage();
+		//IJ.run(imp, "Invert", "");
+		//IJ.wait(1000);
+		//IJ.run(imp, "Invert", "");
+
+		SwingUtilities.invokeLater( new Runnable() {
+			public void run()
+			{
+				new My_Plugin().initialize();				
+			}
+		});
+
+		
+	}
+	
 	private void createDefs()
 	{
-		try {
-//			UGenInfo.readDefinitions();
-			UGenInfo.readBinaryDefinitions();
 
-			final List collDefs = DemoDefs.create();
+		IJ.log("Creating Defs");
+		//IJ.handleException(new Exception("stacktrace"));
+		//try {
+//			UGenInfo.readDefinitions();
+			//UGenInfo.readBinaryDefinitions();
+
+			final List collDefs = My_PluginDefs.create();
 			Collections.sort( collDefs, synthDefNameComp );
 //			defTables[ 1 ].addDefs( collDefs );
 			defTables[ 0 ].addDefs( collDefs );
-		}
-		catch( IOException e1 ) {
-			e1.printStackTrace();
-//			reportError( e1 );
-		}
+		//}
+//		catch( IOException e1 ) {
+//
+//			IJ.handleException(e1);
+//			//e1.printStackTrace();
+////			reportError( e1 );
+//		}
 	}
 
 	private void initServer()
@@ -348,16 +383,16 @@ implements FileFilter, ServerListener, Constants
 		return null;
 	}
 
-    public static void main( String args[] )
-	{
-    	System.out.println("Path="+System.getenv("PATH"));
-		SwingUtilities.invokeLater( new Runnable() {
-			public void run()
-			{
-				new Demo();
-			}
-		});
-	}
+//    public static void main( String args[] )
+//	{
+//    	System.out.println("Path="+System.getenv("PATH"));
+//		SwingUtilities.invokeLater( new Runnable() {
+//			public void run()
+//			{
+//				new My_Plugin();
+//			}
+//		});
+//	}
 
 	protected static void reportError( Exception e ) {
 		System.err.println( e.getClass().getName() + " : " + e.getLocalizedMessage() );
@@ -413,10 +448,12 @@ implements FileFilter, ServerListener, Constants
 	
 // ------------- internal classes -------------
 	
-	private abstract static class DemoDefs
+	private abstract static class My_PluginDefs
 	{
 		private static java.util.List create()
+		
 		{
+			IJ.log("Creating Defs Part 2");
 			final java.util.List result = new ArrayList();
 			final Random rnd = new Random(System.currentTimeMillis());
 			SynthDef def;
@@ -669,7 +706,7 @@ implements FileFilter, ServerListener, Constants
 //	
 //		public void actionPerformed( ActionEvent e )
 //		{
-//			DemoDefs.synthDefApiExample( server );	// doesn't inform nodewatcher though
+//			My_PluginDefs.synthDefApiExample( server );	// doesn't inform nodewatcher though
 //		}
 //	}
 

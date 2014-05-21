@@ -459,10 +459,10 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		public void actionPerformed(final ActionEvent e) {
 			if (selectedTable == null) return;
 
-			final SynthDef def = defTables[0].getDefs().get(0); // selectedTable.getSelectedDef();
+			final SynthDef def = defTables[0].getDefs().get(0);
 			final Synth synth;
 
-			if ((def != null) && (grpAll != null) && (server != null)) {
+			if (def != null && grpAll != null && server != null) {
 				try {
 					synth = Synth.basicNew(def.getName(), server);
 					if (nw != null) nw.register(synth);

@@ -308,7 +308,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			defTables[0].addDefs(collDefs);
 		}
 		catch (final IOException e1) {
-			IJ.handleException(e1);
+			reportError(e1);
 		}
 	}
 
@@ -355,8 +355,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	}
 
 	private static void reportError(final Exception e) {
-		System.err
-			.println(e.getClass().getName() + " : " + e.getLocalizedMessage());
+		IJ.handleException(e);
 	}
 
 	private static SynthDef jSampleAndHoldLiquid() {

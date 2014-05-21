@@ -83,19 +83,19 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 	public static Font fntGUI = ServerPanel.fntGUI;
 
-	protected final SynthDefTable[] defTables = new SynthDefTable[1];
-	protected SynthDefTable selectedTable = null;
+	private final SynthDefTable[] defTables = new SynthDefTable[1];
+	private SynthDefTable selectedTable = null;
 
-	protected static final SynthDefNameComp synthDefNameComp =
+	private static final SynthDefNameComp synthDefNameComp =
 		new SynthDefNameComp();
 
-	protected Server server = null;
-	protected NodeWatcher nw = null;
-	protected Group grpAll;
+	private Server server = null;
+	private NodeWatcher nw = null;
+	private Group grpAll;
 
 	private static final String[] tableNames = { "JCollider" };
 
-	protected final Sonification enc_this = this;
+	private final Sonification enc_this = this;
 
 	public Sonification() {
 		super("Sonification");
@@ -294,7 +294,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 	}
 
-	protected static void reportError(final Exception e) {
+	private static void reportError(final Exception e) {
 		System.err
 			.println(e.getClass().getName() + " : " + e.getLocalizedMessage());
 	}
@@ -393,7 +393,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 		private final SynthDefTableModel tm;
 
-		protected SynthDefTable(final String name) {
+		private SynthDefTable(final String name) {
 			super();
 			tm = new SynthDefTableModel(name);
 			setModel(tm);
@@ -401,11 +401,11 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		}
 
-		protected void addDefs(final List<? extends SynthDef> defs) {
+		private void addDefs(final List<? extends SynthDef> defs) {
 			tm.addDefs(defs);
 		}
 
-		protected List<SynthDef> getDefs() {
+		private List<SynthDef> getDefs() {
 			return tm.getDefs();
 		}
 	}
@@ -415,7 +415,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		private final List<SynthDef> collDefs = new ArrayList<SynthDef>();
 		private final String name;
 
-		protected SynthDefTableModel(final String name) {
+		private SynthDefTableModel(final String name) {
 			super();
 			this.name = name;
 		}
@@ -443,7 +443,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			return null;
 		}
 
-		protected void addDefs(final List<? extends SynthDef> defs) {
+		private void addDefs(final List<? extends SynthDef> defs) {
 			if (defs.isEmpty()) return;
 
 			final int startRow = collDefs.size();
@@ -451,14 +451,14 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			fireTableRowsInserted(startRow, collDefs.size() - 1);
 		}
 
-		protected List<SynthDef> getDefs() {
+		private List<SynthDef> getDefs() {
 			return new ArrayList<SynthDef>(collDefs);
 		}
 	}
 
 	private class ActionPlay extends AbstractAction {
 
-		protected ActionPlay() {
+		private ActionPlay() {
 			super("Play");
 		}
 
@@ -484,7 +484,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 	private class ActionStop extends AbstractAction {
 
-		protected ActionStop() {
+		private ActionStop() {
 			super("Stop All");
 		}
 
@@ -505,7 +505,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 		int idx;
 
-		protected TableSelListener(final int idx) {
+		private TableSelListener(final int idx) {
 			this.idx = idx;
 		}
 
@@ -524,7 +524,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 	private static class SynthDefNameComp implements Comparator<SynthDef> {
 
-		protected SynthDefNameComp() { /* empty */}
+		private SynthDefNameComp() { /* empty */}
 
 		@Override
 		public int compare(final SynthDef def1, final SynthDef def2) {
@@ -536,7 +536,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 		private final int idx;
 
-		protected SynthDefFileTransferHandler(final int idx) {
+		private SynthDefFileTransferHandler(final int idx) {
 			this.idx = idx;
 		}
 

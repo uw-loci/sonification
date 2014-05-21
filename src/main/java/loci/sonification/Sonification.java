@@ -300,7 +300,8 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		try {
 			UGenInfo.readBinaryDefinitions();
 
-			final List<SynthDef> collDefs = SonificationDefs.create();
+			final List<SynthDef> collDefs = new ArrayList<SynthDef>();
+			collDefs.add(jSampleAndHoldLiquid());
 			Collections.sort(collDefs, SYNTH_DEF_NAME_COMP);
 			defTables[0].addDefs(collDefs);
 		}
@@ -356,45 +357,29 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			.println(e.getClass().getName() + " : " + e.getLocalizedMessage());
 	}
 
-	// -- Helper classes --
+	private static SynthDef jSampleAndHoldLiquid() {
+		final GraphElem clockRate =
+			UGen.kr("MouseX", UGen.ir(1), UGen.ir(200), UGen.ir(1));
+		final GraphElem clockTime = UGen.kr("reciprocal", clockRate);
+		final GraphElem clock = UGen.kr("Impulse", clockRate, UGen.ir(0.4f));
+		final GraphElem centerFreq =
+			UGen.kr("MouseY", UGen.ir(100), UGen.ir(8000), UGen.ir(1));
+		final GraphElem freq =
+			UGen.kr("Latch", UGen.kr("MulAdd", UGen.kr("WhiteNoise"), UGen.kr("*",
+				centerFreq, UGen.ir(0.5f)), centerFreq), clock);
+		final GraphElem panPos = UGen.kr("Latch", UGen.kr("WhiteNoise"), clock);
 
-	private abstract static class SonificationDefs {
-
-		private static List<SynthDef> create()
-
-		{
-			IJ.log("Creating Defs Part 2");
-			final List<SynthDef> result = new ArrayList<SynthDef>();
-			SynthDef def;
-			GraphElem f, g, h;
-
-			{
-				final GraphElem clockRate =
-					UGen.kr("MouseX", UGen.ir(1), UGen.ir(200), UGen.ir(1));
-				final GraphElem clockTime = UGen.kr("reciprocal", clockRate);
-				final GraphElem clock = UGen.kr("Impulse", clockRate, UGen.ir(0.4f));
-				final GraphElem centerFreq =
-					UGen.kr("MouseY", UGen.ir(100), UGen.ir(8000), UGen.ir(1));
-				final GraphElem freq =
-					UGen.kr("Latch", UGen.kr("MulAdd", UGen.kr("WhiteNoise"), UGen.kr(
-						"*", centerFreq, UGen.ir(0.5f)), centerFreq), clock);
-				final GraphElem panPos = UGen.kr("Latch", UGen.kr("WhiteNoise"), clock);
-
-				f =
-					UGen.ar("*", UGen.ar("SinOsc", freq), UGen.kr("Decay2", clock, UGen
-						.kr("*", UGen.ir(0.1f), clockTime), UGen.kr("*", UGen.ir(0.9f),
-						clockTime)));
-				g = UGen.ar("Pan2", f, panPos);
-				h = UGen.ar("CombN", g, UGen.ir(0.3f), UGen.ir(0.3f), UGen.ir(2));
-				def =
-					new SynthDef("JSampleAndHoldLiquid", UGen.ar("Out", UGen.ir(0), h));
-				result.add(def);
-			}
-
-			return result;
-		}
-
+		final GraphElem f =
+			UGen
+				.ar("*", UGen.ar("SinOsc", freq), UGen.kr("Decay2", clock, UGen.kr("*",
+					UGen.ir(0.1f), clockTime), UGen.kr("*", UGen.ir(0.9f), clockTime)));
+		final GraphElem g = UGen.ar("Pan2", f, panPos);
+		final GraphElem h =
+			UGen.ar("CombN", g, UGen.ir(0.3f), UGen.ir(0.3f), UGen.ir(2));
+		return new SynthDef("JSampleAndHoldLiquid", UGen.ar("Out", UGen.ir(0), h));
 	}
+
+	// -- Helper classes --
 
 	private static class SynthDefTable extends JTable {
 

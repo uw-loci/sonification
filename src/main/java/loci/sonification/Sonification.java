@@ -299,7 +299,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			.println(e.getClass().getName() + " : " + e.getLocalizedMessage());
 	}
 
-// ------------- ServerListener interface -------------
+	// ------------- ServerListener interface -------------
 
 	@Override
 	public void serverAction(final ServerEvent e) {
@@ -337,7 +337,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		}
 	}
 
-// ------------- FileFilter interface -------------
+	// ------------- FileFilter interface -------------
 
 	@Override
 	public boolean accept(final File f) {
@@ -349,7 +349,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		}
 	}
 
-// ------------- internal classes -------------
+	// ------------- internal classes -------------
 
 	private abstract static class SonificationDefs {
 

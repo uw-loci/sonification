@@ -87,6 +87,8 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 	private static final String[] TABLE_NAMES = { "JCollider" };
 
+	private static final boolean DEBUG = true;
+
 	// -- Fields --
 
 	private final SynthDefTable[] defTables = new SynthDefTable[1];
@@ -193,7 +195,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 					}
 				}
 
-				IJ.log("disposing server window: " + e.getWindow());
+				if (DEBUG) IJ.log("disposing server window: " + e.getWindow());
 				e.getWindow().setVisible(false);
 				e.getWindow().dispose();
 			}
@@ -296,7 +298,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	}
 
 	private void createDefs() {
-		IJ.log("Creating Defs");
+		if (DEBUG) IJ.log("Creating Defs");
 		try {
 			UGenInfo.readBinaryDefinitions();
 

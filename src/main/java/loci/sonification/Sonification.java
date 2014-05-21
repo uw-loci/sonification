@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -359,7 +358,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		{
 			IJ.log("Creating Defs Part 2");
 			final List<SynthDef> result = new ArrayList<SynthDef>();
-			final Random rnd = new Random(System.currentTimeMillis());
 			SynthDef def;
 			GraphElem f, g, h;
 
@@ -405,12 +403,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 		protected void addDefs(final List<? extends SynthDef> defs) {
 			tm.addDefs(defs);
-		}
-
-		protected SynthDef getSelectedDef() {
-			final int row = getSelectedRow();
-			if (row >= 0) return tm.getDef(row);
-			else return null;
 		}
 
 		protected List<SynthDef> getDefs() {
@@ -459,10 +451,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			final int startRow = collDefs.size();
 			collDefs.addAll(defs);
 			fireTableRowsInserted(startRow, collDefs.size() - 1);
-		}
-
-		protected SynthDef getDef(final int idx) {
-			return collDefs.get(idx);
 		}
 
 		protected List<SynthDef> getDefs() {

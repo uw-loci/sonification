@@ -93,7 +93,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	protected NodeWatcher nw = null;
 	protected Group grpAll;
 
-	// private static final String[] tableNames = { "JCollider", "Drop Zone" };
 	private static final String[] tableNames = { "JCollider" };
 
 	protected final Sonification enc_this = this;
@@ -124,14 +123,11 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			}
 		}
 
-//		defTables[0].setRowSelectionInterval(0,0);
-
 		try {
 			cp.setLayout(new BorderLayout());
 			cp.add(b, BorderLayout.CENTER);
 
 			server = new Server("localhost");
-//			loadDefs();
 			createDefs();
 
 			final File f =
@@ -141,13 +137,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 					fs + "Applications" + fs + "SC3",
 					fs + "usr" + fs + "local" + fs + "bin", fs + "usr" + fs + "bin",
 					"C:\\Program Files\\SC3", "C:\\Program Files\\SuperCollider_f" });
-//			if( (f == null) && JCollider.isMacOS ) {
-//				try {
-//					f = MRJAdapter.findApplication( "SCjm" );
-//					if( f != null ) f = new File( f.getParentFile(), "scsynth" );
-//				}
-//				catch( IOException e1 ) {}
-//			}
 			if (f != null) Server.setProgram(f.getAbsolutePath());
 
 			ggAppPath.setText(Server.getProgram());
@@ -160,8 +149,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			});
 			lb = new JLabel("Server App Path :");
 			lb.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 4));
-			// b2.add( lb );
-			// b2.add( ggAppPath );
 			cp.add(b2, BorderLayout.NORTH);
 			cp.add(createButtons(), BorderLayout.SOUTH);
 
@@ -171,7 +158,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 				server.startAliveThread();
 			}
 			catch (final IOException e1) { /* ignored */}
-//			if( server.isRunning() ) initServer();
 			spf =
 				ServerPanel.makeWindow(server, ServerPanel.MIMIC | ServerPanel.CONSOLE |
 					ServerPanel.DUMP);
@@ -207,42 +193,16 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 				IJ.log("disposing server window: " + e.getWindow());
 				e.getWindow().setVisible(false);
 				e.getWindow().dispose();
-				// System.exit( 0 );
 			}
 		});
 
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-//		pack();
 		if (spf != null) setLocation(spf.getX() + spf.getWidth() + 24, spf.getY());
 		setSize(512, 512);
 		setVisible(true);
 		toFront();
-//		defTables[0].setRowSelectionInterval(0,0);
 	}
-
-//	private void loadDefs()
-//	{
-//		final File[]			defFiles	= new File( "synthdefs" ).listFiles( this );
-//		SynthDef[]				defs;
-//		final List	collDefs	= new ArrayList();
-//	
-//		for( int i = 0; i < defFiles.length; i++ ) {
-//			try {
-//				defs = SynthDef.readDefFile( defFiles[ i ]);
-//				for( int j = 0; j < defs.length; j++ ) {
-//					collDefs.add( defs[ j ]);
-//				}
-//			}
-//			catch( IOException e1 ) {
-//				System.err.println( defFiles[ i ].getName() + " : " + e1.getClass().getName() +
-//					" : " + e1.getLocalizedMessage() );
-//			}
-//		}
-//		
-//		Collections.sort( collDefs, synthDefNameComp );
-//		defTables[ 0 ].addDefs( collDefs );
-//	}
 
 	private JComponent createButtons() {
 		final Box b = Box.createHorizontalBox();
@@ -254,29 +214,12 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		but = new JButton(new ActionStop());
 		but.setToolTipText("Stop All Synths");
 		b.add(but);
-		// but = new JButton( new ActionDiagram() );
-		// but.setToolTipText( "Open Diagram For Selected SynthDef" );
-		// b.add( but );
-		// but = new JButton( new ActionDump() );
-		// but.setToolTipText( "Dump Selected SynthDef To The System Console" );
-		// b.add( but );
-		// but = new JButton( new ActionSynthDefApiEx() );
-		// but.setToolTipText( "Demo code from SynthDef API doc" );
-		// b.add( but );
-		// but = new JButton( new ActionNodeTree() );
-		// but.setToolTipText( "View a Tree of all Nodes" );
-		// b.add( but );
 
 		return b;
 	}
 
 	@Override
 	public void run(final String arg) {
-		// ImagePlus imp = IJ.getImage();
-		// IJ.run(imp, "Invert", "");
-		// IJ.wait(1000);
-		// IJ.run(imp, "Invert", "");
-
 		SwingUtilities.invokeLater(new Runnable() {
 
 			@Override
@@ -290,21 +233,15 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	private void createDefs() {
 
 		IJ.log("Creating Defs");
-		// IJ.handleException(new Exception("stacktrace"));
 		try {
-//			UGenInfo.readDefinitions();
 			UGenInfo.readBinaryDefinitions();
 
 			final List collDefs = SonificationDefs.create();
 			Collections.sort(collDefs, synthDefNameComp);
-//			defTables[ 1 ].addDefs( collDefs );
 			defTables[0].addDefs(collDefs);
 		}
 		catch (final IOException e1) {
-
 			IJ.handleException(e1);
-			// e1.printStackTrace();
-//			reportError( e1 );
 		}
 	}
 
@@ -314,7 +251,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			server.initTree();
 			server.notify(true);
 		}
-//		if( nw != null ) nw.dispose();
 		nw = NodeWatcher.newFrom(server);
 		grpAll = Group.basicNew(server);
 		nw.register(server.getDefaultGroup());
@@ -466,11 +402,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		}
 
-//		private void addDef( SynthDef def )
-//		{
-//			tm.addDef( def );
-//		}
-
 		protected void addDefs(final List defs) {
 			tm.addDefs(defs);
 		}
@@ -521,12 +452,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			}
 		}
 
-//		private void addDef( SynthDef def )
-//		{
-//			collDefs.add( def );
-//			fireTableRowsInserted( collDefs.size() - 1, collDefs.size() - 1 );
-//		}
-
 		protected void addDefs(final List defs) {
 			if (defs.isEmpty()) return;
 
@@ -538,11 +463,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		protected SynthDef getDef(final int idx) {
 			return (SynthDef) collDefs.get(idx);
 		}
-
-//		private int getNumDefs()
-//		{
-//			return collDefs.size();
-//		}
 
 		protected List getDefs() {
 			return new ArrayList(collDefs);
@@ -614,84 +534,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			}
 		}
 	}
-
-//	private class ActionDiagram
-//	extends AbstractAction
-//	{
-//		protected ActionDiagram()
-//		{
-//			super( "Def Diagram" );			
-//		}
-//	
-//		public void actionPerformed( ActionEvent e )
-//		{
-//			if( selectedTable == null ) return;
-//			
-//			final SynthDef def = selectedTable.getSelectedDef();
-//			if( def != null ) {
-//				new SynthDefDiagram( def );
-//			}
-//		}
-//	}
-
-//	private class ActionDump
-//	extends AbstractAction
-//	{
-//		protected ActionDump()
-//		{
-//			super( "Def Dump" );			
-//		}
-//	
-//		public void actionPerformed( ActionEvent e )
-//		{
-//			if( selectedTable == null ) return;
-//			
-//			final SynthDef def = selectedTable.getSelectedDef();
-//			if( def != null ) {
-//				def.printOn( System.out );
-//			}
-//		}
-//	}
-
-//	private class ActionSynthDefApiEx
-//	extends AbstractAction
-//	{
-//		protected ActionSynthDefApiEx()
-//		{
-//			super( "API Ex" );
-//		}
-//	
-//		public void actionPerformed( ActionEvent e )
-//		{
-//			SonificationDefs.synthDefApiExample( server );	// doesn't inform nodewatcher though
-//		}
-//	}
-
-//	private class ActionNodeTree
-//	extends AbstractAction
-//	{
-//		protected ActionNodeTree()
-//		{
-//			super( "Node Tree" );			
-//		}
-//	
-//		public void actionPerformed( ActionEvent e )
-//		{
-//			if( (server == null) || (nw == null) || (grpAll == null) ) return;
-//		
-//			final NodeTreePanel		ntp			= new NodeTreePanel( nw, grpAll );
-//			final JFrame			treeFrame	= ntp.makeWindow();
-//			
-//			treeFrame.addWindowListener( new WindowAdapter() {
-//				public void windowClosing( WindowEvent e )
-//				{
-//					treeFrame.setVisible( false );
-//					treeFrame.dispose();
-//					ntp.dispose();
-//				}
-//			});
-//		}
-//	}
 
 	private static class SynthDefNameComp implements Comparator {
 

@@ -319,7 +319,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 					new javax.swing.Timer(1000, new ActionListener() {
 
 						@Override
-						public void actionPerformed(final ActionEvent e) {
+						public void actionPerformed(final ActionEvent evt) {
 							try {
 								if (server != null) server.startAliveThread();
 							}
@@ -440,9 +440,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			if (row < collDefs.size()) {
 				return (collDefs.get(row)).getName();
 			}
-			else {
-				return null;
-			}
+			return null;
 		}
 
 		protected void addDefs(final List<? extends SynthDef> defs) {
@@ -548,7 +546,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		@Override
 		public boolean importData(final JComponent c, final Transferable t) {
 			final Object o;
-			final List<File> fileList;
 			final List<SynthDef> collDefs;
 			File f;
 			SynthDef[] defs;
@@ -557,7 +554,8 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 				if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
 					o = t.getTransferData(DataFlavor.javaFileListFlavor);
 					if (o instanceof List) {
-						fileList = (List<File>) o;
+						@SuppressWarnings("unchecked")
+						final List<File> fileList = (List<File>) o;
 						collDefs = new ArrayList<SynthDef>();
 						for (int i = 0; i < fileList.size(); i++) {
 							f = fileList.get(i);

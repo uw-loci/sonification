@@ -12,7 +12,7 @@
 //  Created by Hanns Holger Rutz on 10.09.05.
 //
 
-package sonification;
+package loci.sonification;
 
 import java.awt.BorderLayout;
 import java.awt.Container;

@@ -1,20 +1,4 @@
-
-
-//
-//  My_Plugin.java
-//
-//	This My_Pluginnstrates some features of JCollider. This My_Plugin
-//	class is absolutely free and comes with absolutely no
-//	warranties. JColider itself is released under the GNU GPL
-//	(see separate license file).
-//
-//	To launch the compiled class, CD into the JColider folder
-//	and run the JSuperColiderMy_Plugin.sh shell script.
-//
-//  Created by Hanns Holger Rutz on 10.09.05.
-//
-
-//package sonification;
+package loci.sonification;
 
 import ij.*;
 import ij.process.*;
@@ -65,50 +49,7 @@ import javax.swing.table.AbstractTableModel;
 import de.sciss.jcollider.*;
 import de.sciss.jcollider.gui.*;
 
-/**
- *	This class My_Pluginnstrates some
- *	of JCollider's features, namely
- *	loading and building synth defs,
- *	along with instantiating and
- *	controlling a server, showing
- *	GUI elements like a server window
- *	and a synthdef diagram.
- *	<p>
- *	A frame is opened with three tables,
- *	the leftmost showing all synthdefs
- *	found in the folder &quot;synthdefs&quot;
- *	inside the cwd. The middle table
- *	shows a list of synthdefs that have
- *	been internally build using JCollider.
- *	The right most table will carry defs
- *	which have been drag-and-dropped from
- *	the finder.
- *	<p>
- *	A GUI server window is opened for the localhost,
- *	using default server options. Before booting,
- *	check that the application path to scsynth is
- *	correctly specified in the main frame.
- *	<p>
- *	Buttons at the bottom of the main frame will
- *	create a synth for the selected def, stop all
- *	synths, open a synthdef diagram and print the
- *	def to the system console. A tree view of the node graph
- *	can be created.
- *
- *	@version	0.32, 25-Feb-08
- *	@author		Hanns Holger Rutz
- *
- *	@todo		the My_Plugin and the NodeWatcher get irritated if
- *				a server is already running and containing
- *				nodes when the My_Plugin is launched
- *	@todo		quitting the application from the apple menu
- *				will not perform clean-ups, notably the server
- *				will not be shut down. please use main window's
- *				close gadget for now
- *	@todo		should be possible to drag + drop nodes in
- *				the tree panel, create subgroups etc.
- */
-public class My_Plugin
+public class Sonification
 extends JFrame
 implements FileFilter, ServerListener, Constants, PlugIn
 {
@@ -126,11 +67,11 @@ implements FileFilter, ServerListener, Constants, PlugIn
 	//private static final String[] tableNames = { "JCollider", "Drop Zone" };
 	private static final String[] tableNames = {"JCollider"};
 
-	protected final My_Plugin enc_this	= this;
+	protected final Sonification enc_this	= this;
 	
-	public My_Plugin()
+	public Sonification()
 	{
-		super( "JCollider My_Plugin" );
+		super( "Sonification" );
 	}
 
 	public void initialize()
@@ -289,7 +230,7 @@ implements FileFilter, ServerListener, Constants, PlugIn
 		//but.setToolTipText( "Dump Selected SynthDef To The System Console" );
 		//b.add( but );
 		//but = new JButton( new ActionSynthDefApiEx() );
-		//but.setToolTipText( "My_Plugin code from SynthDef API doc" );
+		//but.setToolTipText( "Demo code from SynthDef API doc" );
 		//b.add( but );
 		//but = new JButton( new ActionNodeTree() );
 		//but.setToolTipText( "View a Tree of all Nodes" );
@@ -324,7 +265,7 @@ implements FileFilter, ServerListener, Constants, PlugIn
 //			UGenInfo.readDefinitions();
 			UGenInfo.readBinaryDefinitions();
 
-			final List collDefs = My_PluginDefs.create();
+			final List collDefs = SonificationDefs.create();
 			Collections.sort( collDefs, synthDefNameComp );
 //			defTables[ 1 ].addDefs( collDefs );
 			defTables[ 0 ].addDefs( collDefs );
@@ -388,7 +329,7 @@ implements FileFilter, ServerListener, Constants, PlugIn
 	{
     	System.out.println("Path="+System.getenv("PATH"));
     	new ImageJ();
-    	new My_Plugin().run("");
+    	new Sonification().run("");
     	
 	}
 
@@ -446,7 +387,7 @@ implements FileFilter, ServerListener, Constants, PlugIn
 	
 // ------------- internal classes -------------
 	
-	private abstract static class My_PluginDefs
+	private abstract static class SonificationDefs
 	{
 		private static java.util.List create()
 		
@@ -704,7 +645,7 @@ implements FileFilter, ServerListener, Constants, PlugIn
 //	
 //		public void actionPerformed( ActionEvent e )
 //		{
-//			My_PluginDefs.synthDefApiExample( server );	// doesn't inform nodewatcher though
+//			SonificationDefs.synthDefApiExample( server );	// doesn't inform nodewatcher though
 //		}
 //	}
 

@@ -42,7 +42,6 @@ import ij.plugin.PlugIn;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Font;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -85,8 +84,6 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		new SynthDefNameComp();
 
 	private static final String[] TABLE_NAMES = { "JCollider" };
-
-	public static Font fntGUI = ServerPanel.fntGUI;
 
 	private final SynthDefTable[] defTables = new SynthDefTable[1];
 	private SynthDefTable selectedTable = null;
@@ -169,7 +166,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 				JOptionPane.ERROR_MESSAGE);
 		}
 
-		JCollider.setDeepFont(cp, fntGUI);
+		JCollider.setDeepFont(cp, ServerPanel.fntGUI);
 
 		addWindowListener(new WindowAdapter() {
 

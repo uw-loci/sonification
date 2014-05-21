@@ -23,13 +23,22 @@
 
 package loci.sonification;
 
-import ij.*;
-import ij.process.*;
-import ij.gui.*;
-//import java.awt.*;
-import ij.plugin.*;
-import ij.plugin.frame.*;
-import javax.swing.WindowConstants;
+import de.sciss.jcollider.Constants;
+import de.sciss.jcollider.GraphElem;
+import de.sciss.jcollider.Group;
+import de.sciss.jcollider.JCollider;
+import de.sciss.jcollider.NodeWatcher;
+import de.sciss.jcollider.Server;
+import de.sciss.jcollider.ServerEvent;
+import de.sciss.jcollider.ServerListener;
+import de.sciss.jcollider.Synth;
+import de.sciss.jcollider.SynthDef;
+import de.sciss.jcollider.UGen;
+import de.sciss.jcollider.UGenInfo;
+import de.sciss.jcollider.gui.ServerPanel;
+import ij.IJ;
+import ij.ImageJ;
+import ij.plugin.PlugIn;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -44,12 +53,11 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-
-import java.util.Random;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -65,78 +73,74 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
+import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
-import de.sciss.jcollider.*;
-import de.sciss.jcollider.gui.*;
-
-public class Sonification
-extends JFrame
-implements FileFilter, ServerListener, Constants, PlugIn
+public class Sonification extends JFrame implements FileFilter, ServerListener,
+	Constants, PlugIn
 {
-	public static Font	fntGUI	= ServerPanel.fntGUI;
 
-	protected final SynthDefTable[] defTables = new SynthDefTable[ 1 ];
-	protected SynthDefTable selectedTable	= null;
-	
+	public static Font fntGUI = ServerPanel.fntGUI;
+
+	protected final SynthDefTable[] defTables = new SynthDefTable[1];
+	protected SynthDefTable selectedTable = null;
+
 	protected static final Comparator synthDefNameComp = new SynthDefNameComp();
-	
-	protected Server		server	= null;
-	protected NodeWatcher	nw		= null;
-	protected Group			grpAll;
-	
-	//private static final String[] tableNames = { "JCollider", "Drop Zone" };
-	private static final String[] tableNames = {"JCollider"};
 
-	protected final Sonification enc_this	= this;
-	
-	public Sonification()
-	{
-		super( "Sonification" );
+	protected Server server = null;
+	protected NodeWatcher nw = null;
+	protected Group grpAll;
+
+	// private static final String[] tableNames = { "JCollider", "Drop Zone" };
+	private static final String[] tableNames = { "JCollider" };
+
+	protected final Sonification enc_this = this;
+
+	public Sonification() {
+		super("Sonification");
 	}
 
-	public void initialize()
-	{
-		final Box			b			= Box.createHorizontalBox();
-		final Box			b2			= Box.createHorizontalBox();
-		final Container		cp			= getContentPane();
-		final JTextField	ggAppPath	= new JTextField( 32 );
-		final String		fs			= File.separator;
-		JScrollPane			ggScroll;
-		JLabel				lb;
-		JFrame				spf			= null;
-		
-		for( int i = 0; i < 1; i++ ) {
-			defTables[ i ]	= new SynthDefTable( tableNames[ i ]);
-			ggScroll		= new JScrollPane( defTables[ i ]);
-			b.add( ggScroll );
-			defTables[ i ].getSelectionModel().addListSelectionListener( new TableSelListener( i ));
-			if( i == 1 ) {
-				ggScroll.setTransferHandler( new SynthDefFileTransferHandler( 1 ));
-				ggScroll.setToolTipText( "Drop SynthDef Files from the Finder here" );
+	public void initialize() {
+		final Box b = Box.createHorizontalBox();
+		final Box b2 = Box.createHorizontalBox();
+		final Container cp = getContentPane();
+		final JTextField ggAppPath = new JTextField(32);
+		final String fs = File.separator;
+		JScrollPane ggScroll;
+		JLabel lb;
+		JFrame spf = null;
+
+		for (int i = 0; i < 1; i++) {
+			defTables[i] = new SynthDefTable(tableNames[i]);
+			ggScroll = new JScrollPane(defTables[i]);
+			b.add(ggScroll);
+			defTables[i].getSelectionModel().addListSelectionListener(
+				new TableSelListener(i));
+			if (i == 1) {
+				ggScroll.setTransferHandler(new SynthDefFileTransferHandler(1));
+				ggScroll.setToolTipText("Drop SynthDef Files from the Finder here");
 			}
 		}
-		
+
 //		defTables[0].setRowSelectionInterval(0,0);
 
 		try {
-			cp.setLayout( new BorderLayout() );
-			cp.add( b, BorderLayout.CENTER );
+			cp.setLayout(new BorderLayout());
+			cp.add(b, BorderLayout.CENTER);
 
-			server = new Server( "localhost" );
+			server = new Server("localhost");
 //			loadDefs();
 			createDefs();
 
-			File f = findFile( JCollider.isWindows ? "scsynth.exe" : "scsynth", new String[] {
-				fs + "Applications" + fs + "SuperCollider" + fs + "SuperCollider.app" + fs + "Contents" + fs + "Resources",
-				fs + "Applications" + fs + "SC3",
-				fs + "usr" + fs + "local" + fs + "bin",
-				fs + "usr" + fs + "bin",
-				"C:\\Program Files\\SC3",
-				"C:\\Program Files\\SuperCollider_f"
-			});
+			final File f =
+				findFile(JCollider.isWindows ? "scsynth.exe" : "scsynth", new String[] {
+					fs + "Applications" + fs + "SuperCollider" + fs +
+						"SuperCollider.app" + fs + "Contents" + fs + "Resources",
+					fs + "Applications" + fs + "SC3",
+					fs + "usr" + fs + "local" + fs + "bin", fs + "usr" + fs + "bin",
+					"C:\\Program Files\\SC3", "C:\\Program Files\\SuperCollider_f" });
 //			if( (f == null) && JCollider.isMacOS ) {
 //				try {
 //					f = MRJAdapter.findApplication( "SCjm" );
@@ -144,74 +148,79 @@ implements FileFilter, ServerListener, Constants, PlugIn
 //				}
 //				catch( IOException e1 ) {}
 //			}
-			if( f != null ) Server.setProgram( f.getAbsolutePath() );
+			if (f != null) Server.setProgram(f.getAbsolutePath());
 
-			ggAppPath.setText( Server.getProgram() );
-			ggAppPath.addActionListener( new ActionListener() {
-				public void actionPerformed( ActionEvent e )
-				{
-					Server.setProgram( ggAppPath.getText() );
+			ggAppPath.setText(Server.getProgram());
+			ggAppPath.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					Server.setProgram(ggAppPath.getText());
 				}
 			});
-			lb = new JLabel( "Server App Path :" );
-			lb.setBorder( BorderFactory.createEmptyBorder( 2, 6, 2, 4 ));
-			//b2.add( lb );
-			//b2.add( ggAppPath );
-			cp.add( b2, BorderLayout.NORTH );
-			cp.add( createButtons(), BorderLayout.SOUTH );
+			lb = new JLabel("Server App Path :");
+			lb.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 4));
+			// b2.add( lb );
+			// b2.add( ggAppPath );
+			cp.add(b2, BorderLayout.NORTH);
+			cp.add(createButtons(), BorderLayout.SOUTH);
 
-			server.addListener( this );
+			server.addListener(this);
 			try {
 				server.start();
 				server.startAliveThread();
 			}
-			catch( IOException e1 ) { /* ignored */ }
+			catch (final IOException e1) { /* ignored */}
 //			if( server.isRunning() ) initServer();
-			spf = ServerPanel.makeWindow( server, ServerPanel.MIMIC | ServerPanel.CONSOLE | ServerPanel.DUMP );
+			spf =
+				ServerPanel.makeWindow(server, ServerPanel.MIMIC | ServerPanel.CONSOLE |
+					ServerPanel.DUMP);
 			spf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		}
-		catch( IOException e1 ) {
-			JOptionPane.showMessageDialog( this, "Failed to create a server :\n" + e1.getClass().getName() +
-				e1.getLocalizedMessage(), this.getTitle(), JOptionPane.ERROR_MESSAGE );
+		catch (final IOException e1) {
+			JOptionPane.showMessageDialog(this, "Failed to create a server :\n" +
+				e1.getClass().getName() + e1.getLocalizedMessage(), this.getTitle(),
+				JOptionPane.ERROR_MESSAGE);
 		}
 
-		JCollider.setDeepFont( cp, fntGUI );
+		JCollider.setDeepFont(cp, fntGUI);
 
-		addWindowListener( new WindowAdapter() {
-			public void windowClosing( WindowEvent e )
-			{
-				if( nw != null ) {
+		addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowClosing(final WindowEvent e) {
+				if (nw != null) {
 					nw.dispose();
 					nw = null;
 				}
-				if( server != null ) {
+				if (server != null) {
 					try {
-						if( server.didWeBootTheServer() ) server.quitAndWait();
-						else if( grpAll != null ) grpAll.free();
+						if (server.didWeBootTheServer()) server.quitAndWait();
+						else if (grpAll != null) grpAll.free();
 						server = null;
 					}
-					catch( IOException e1 ) {
-						reportError( e1 );
+					catch (final IOException e1) {
+						reportError(e1);
 					}
 				}
 
 				IJ.log("disposing server window: " + e.getWindow());
-				e.getWindow().setVisible( false );
+				e.getWindow().setVisible(false);
 				e.getWindow().dispose();
-				//System.exit( 0 );
+				// System.exit( 0 );
 			}
 		});
-		
-		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
-		
+
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
 //		pack();
-		if( spf != null ) setLocation( spf.getX() + spf.getWidth() + 24, spf.getY() );
-		setSize( 512, 512 );
-		setVisible( true );
+		if (spf != null) setLocation(spf.getX() + spf.getWidth() + 24, spf.getY());
+		setSize(512, 512);
+		setVisible(true);
 		toFront();
 //		defTables[0].setRowSelectionInterval(0,0);
 	}
-	
+
 //	private void loadDefs()
 //	{
 //		final File[]			defFiles	= new File( "synthdefs" ).listFiles( this );
@@ -234,285 +243,280 @@ implements FileFilter, ServerListener, Constants, PlugIn
 //		Collections.sort( collDefs, synthDefNameComp );
 //		defTables[ 0 ].addDefs( collDefs );
 //	}
-	
-	private JComponent createButtons()
-	{
-		final Box	b	= Box.createHorizontalBox();
-		JButton		but;
-		
-		but	= new JButton( new ActionPlay() );
-		but.setToolTipText( "Play Selected SynthDef" );
-		b.add( but );
-		but = new JButton( new ActionStop() );
-		but.setToolTipText( "Stop All Synths" );
-		b.add( but );
-		//but = new JButton( new ActionDiagram() );
-		//but.setToolTipText( "Open Diagram For Selected SynthDef" );
-		//b.add( but );
-		//but = new JButton( new ActionDump() );
-		//but.setToolTipText( "Dump Selected SynthDef To The System Console" );
-		//b.add( but );
-		//but = new JButton( new ActionSynthDefApiEx() );
-		//but.setToolTipText( "Demo code from SynthDef API doc" );
-		//b.add( but );
-		//but = new JButton( new ActionNodeTree() );
-		//but.setToolTipText( "View a Tree of all Nodes" );
-		//b.add( but );
-		
+
+	private JComponent createButtons() {
+		final Box b = Box.createHorizontalBox();
+		JButton but;
+
+		but = new JButton(new ActionPlay());
+		but.setToolTipText("Play Selected SynthDef");
+		b.add(but);
+		but = new JButton(new ActionStop());
+		but.setToolTipText("Stop All Synths");
+		b.add(but);
+		// but = new JButton( new ActionDiagram() );
+		// but.setToolTipText( "Open Diagram For Selected SynthDef" );
+		// b.add( but );
+		// but = new JButton( new ActionDump() );
+		// but.setToolTipText( "Dump Selected SynthDef To The System Console" );
+		// b.add( but );
+		// but = new JButton( new ActionSynthDefApiEx() );
+		// but.setToolTipText( "Demo code from SynthDef API doc" );
+		// b.add( but );
+		// but = new JButton( new ActionNodeTree() );
+		// but.setToolTipText( "View a Tree of all Nodes" );
+		// b.add( but );
+
 		return b;
 	}
-	
-	public void run(String arg) {
-		//ImagePlus imp = IJ.getImage();
-		//IJ.run(imp, "Invert", "");
-		//IJ.wait(1000);
-		//IJ.run(imp, "Invert", "");
 
-		SwingUtilities.invokeLater( new Runnable() {
-			
-			public void run()
-			{
-				initialize();				
+	@Override
+	public void run(final String arg) {
+		// ImagePlus imp = IJ.getImage();
+		// IJ.run(imp, "Invert", "");
+		// IJ.wait(1000);
+		// IJ.run(imp, "Invert", "");
+
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				initialize();
 			}
 		});
 
-		
 	}
-	
-	private void createDefs()
-	{
+
+	private void createDefs() {
 
 		IJ.log("Creating Defs");
-		//IJ.handleException(new Exception("stacktrace"));
+		// IJ.handleException(new Exception("stacktrace"));
 		try {
 //			UGenInfo.readDefinitions();
 			UGenInfo.readBinaryDefinitions();
 
 			final List collDefs = SonificationDefs.create();
-			Collections.sort( collDefs, synthDefNameComp );
+			Collections.sort(collDefs, synthDefNameComp);
 //			defTables[ 1 ].addDefs( collDefs );
-			defTables[ 0 ].addDefs( collDefs );
+			defTables[0].addDefs(collDefs);
 		}
-		catch( IOException e1 ) {
+		catch (final IOException e1) {
 
 			IJ.handleException(e1);
-			//e1.printStackTrace();
+			// e1.printStackTrace();
 //			reportError( e1 );
 		}
 	}
 
-	private void initServer()
-	throws IOException
-	{
+	private void initServer() throws IOException {
 		sendDefs();
-		if( !server.didWeBootTheServer() ) {
+		if (!server.didWeBootTheServer()) {
 			server.initTree();
-			server.notify( true );
+			server.notify(true);
 		}
 //		if( nw != null ) nw.dispose();
-		nw		= NodeWatcher.newFrom( server );
-		grpAll	= Group.basicNew( server );
-		nw.register( server.getDefaultGroup() );
-		nw.register( grpAll );
-		server.sendMsg( grpAll.newMsg() );
+		nw = NodeWatcher.newFrom(server);
+		grpAll = Group.basicNew(server);
+		nw.register(server.getDefaultGroup());
+		nw.register(grpAll);
+		server.sendMsg(grpAll.newMsg());
 	}
 
-	private void sendDefs()
-	{
-		List	defs;
-		SynthDef		def;
-	
-		for( int i = 0; i < defTables.length; i++ ) {
-			defs = defTables[ i ].getDefs();
-			for( int j = 0; j < defs.size(); j++ ) {
-				def = (SynthDef) defs.get( j );
+	private void sendDefs() {
+		List defs;
+		SynthDef def;
+
+		for (int i = 0; i < defTables.length; i++) {
+			defs = defTables[i].getDefs();
+			for (int j = 0; j < defs.size(); j++) {
+				def = (SynthDef) defs.get(j);
 				try {
-					def.send( server );
+					def.send(server);
 				}
-				catch( IOException e1 ) {
-					System.err.println( "Sending Def " + def.getName() + " : " +
-						e1.getClass().getName() + " : " + e1.getLocalizedMessage() );
+				catch (final IOException e1) {
+					System.err.println("Sending Def " + def.getName() + " : " +
+						e1.getClass().getName() + " : " + e1.getLocalizedMessage());
 				}
 			}
 		}
 	}
 
-	private static File findFile( String fileName, String[] folders )
-	{
+	private static File findFile(final String fileName, final String[] folders) {
 		File f;
-	
-		for( int i = 0; i < folders.length; i++ ) {
-			f = new File( folders[ i ], fileName );
-			if( f.exists() ) return f;
+
+		for (int i = 0; i < folders.length; i++) {
+			f = new File(folders[i], fileName);
+			if (f.exists()) return f;
 		}
 		return null;
 	}
 
-    public static void main( String args[] )
-	{
-    	System.out.println("Path="+System.getenv("PATH"));
-    	new ImageJ();
-    	new Sonification().run("");
-    	
+	public static void main(final String args[]) {
+		System.out.println("Path=" + System.getenv("PATH"));
+		new ImageJ();
+		new Sonification().run("");
+
 	}
 
-	protected static void reportError( Exception e ) {
-		System.err.println( e.getClass().getName() + " : " + e.getLocalizedMessage() );
+	protected static void reportError(final Exception e) {
+		System.err
+			.println(e.getClass().getName() + " : " + e.getLocalizedMessage());
 	}
 
 // ------------- ServerListener interface -------------
 
-	public void serverAction( ServerEvent e )
-	{
-		switch( e.getID() ) {
-		case ServerEvent.RUNNING:
-			try {
-				initServer();
-			}
-			catch( IOException e1 ) {
-				reportError( e1 );
-			}
-			break;
-		
-		case ServerEvent.STOPPED:
-			// re-run alive thread
-			final javax.swing.Timer t = new javax.swing.Timer( 1000, new ActionListener() {
-				public void actionPerformed( ActionEvent e )
-				{
-					try {
-						if( server != null ) server.startAliveThread();
-					}
-					catch( IOException e1 ) {
-						reportError( e1 );
-					}
+	@Override
+	public void serverAction(final ServerEvent e) {
+		switch (e.getID()) {
+			case ServerEvent.RUNNING:
+				try {
+					initServer();
 				}
-			});
-			t.setRepeats( false );
-			t.start();
-			break;
-		
-		default:
-			break;
+				catch (final IOException e1) {
+					reportError(e1);
+				}
+				break;
+
+			case ServerEvent.STOPPED:
+				// re-run alive thread
+				final javax.swing.Timer t =
+					new javax.swing.Timer(1000, new ActionListener() {
+
+						@Override
+						public void actionPerformed(final ActionEvent e) {
+							try {
+								if (server != null) server.startAliveThread();
+							}
+							catch (final IOException e1) {
+								reportError(e1);
+							}
+						}
+					});
+				t.setRepeats(false);
+				t.start();
+				break;
+
+			default:
+				break;
 		}
 	}
 
 // ------------- FileFilter interface -------------
 
-	public boolean accept( File f )
-	{
+	@Override
+	public boolean accept(final File f) {
 		try {
-			return SynthDef.isDefFile( f );
+			return SynthDef.isDefFile(f);
 		}
-		catch( IOException e1 ) {
+		catch (final IOException e1) {
 			return false;
 		}
 	}
-	
+
 // ------------- internal classes -------------
-	
-	private abstract static class SonificationDefs
-	{
+
+	private abstract static class SonificationDefs {
+
 		private static java.util.List create()
-		
+
 		{
 			IJ.log("Creating Defs Part 2");
 			final java.util.List result = new ArrayList();
 			final Random rnd = new Random(System.currentTimeMillis());
 			SynthDef def;
-			GraphElem f,g,h;
-			
-			{
-				GraphElem	clockRate	= UGen.kr( "MouseX", UGen.ir( 1 ), UGen.ir( 200 ), UGen.ir( 1 ));
-				GraphElem	clockTime	= UGen.kr( "reciprocal", clockRate );
-				GraphElem	clock		= UGen.kr( "Impulse", clockRate, UGen.ir( 0.4f ));
-				GraphElem	centerFreq	= UGen.kr( "MouseY", UGen.ir( 100 ), UGen.ir( 8000 ), UGen.ir( 1 ));
-				GraphElem	freq		= UGen.kr( "Latch", UGen.kr( "MulAdd", UGen.kr( "WhiteNoise" ),
-											UGen.kr( "*", centerFreq, UGen.ir( 0.5f )), centerFreq ), clock );
-				GraphElem	panPos		= UGen.kr( "Latch", UGen.kr( "WhiteNoise" ), clock );
+			GraphElem f, g, h;
 
-				f	= UGen.ar( "*", UGen.ar( "SinOsc", freq ), UGen.kr( "Decay2", clock,
-						UGen.kr( "*", UGen.ir( 0.1f ), clockTime ), UGen.kr( "*", UGen.ir( 0.9f ), clockTime )));
-				g	= UGen.ar( "Pan2", f, panPos );
-				h	= UGen.ar( "CombN", g, UGen.ir( 0.3f ), UGen.ir( 0.3f ), UGen.ir( 2 ));
-				def = new SynthDef( "JSampleAndHoldLiquid", UGen.ar( "Out", UGen.ir( 0 ), h ));
-				result.add( def );
+			{
+				final GraphElem clockRate =
+					UGen.kr("MouseX", UGen.ir(1), UGen.ir(200), UGen.ir(1));
+				final GraphElem clockTime = UGen.kr("reciprocal", clockRate);
+				final GraphElem clock = UGen.kr("Impulse", clockRate, UGen.ir(0.4f));
+				final GraphElem centerFreq =
+					UGen.kr("MouseY", UGen.ir(100), UGen.ir(8000), UGen.ir(1));
+				final GraphElem freq =
+					UGen.kr("Latch", UGen.kr("MulAdd", UGen.kr("WhiteNoise"), UGen.kr(
+						"*", centerFreq, UGen.ir(0.5f)), centerFreq), clock);
+				final GraphElem panPos = UGen.kr("Latch", UGen.kr("WhiteNoise"), clock);
+
+				f =
+					UGen.ar("*", UGen.ar("SinOsc", freq), UGen.kr("Decay2", clock, UGen
+						.kr("*", UGen.ir(0.1f), clockTime), UGen.kr("*", UGen.ir(0.9f),
+						clockTime)));
+				g = UGen.ar("Pan2", f, panPos);
+				h = UGen.ar("CombN", g, UGen.ir(0.3f), UGen.ir(0.3f), UGen.ir(2));
+				def =
+					new SynthDef("JSampleAndHoldLiquid", UGen.ar("Out", UGen.ir(0), h));
+				result.add(def);
 			}
-			
+
 			return result;
 		}
-		
-		
+
 	}
-	
-	private static class SynthDefTable
-	extends JTable
-	{
+
+	private static class SynthDefTable extends JTable {
+
 		private final SynthDefTableModel tm;
-	
-		protected SynthDefTable( String name )
-		{
+
+		protected SynthDefTable(final String name) {
 			super();
-			tm = new SynthDefTableModel( name );
-			setModel( tm );
-			getColumnModel().getColumn( 0 ).setPreferredWidth( 128 );
-			setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
+			tm = new SynthDefTableModel(name);
+			setModel(tm);
+			getColumnModel().getColumn(0).setPreferredWidth(128);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		}
-		
+
 //		private void addDef( SynthDef def )
 //		{
 //			tm.addDef( def );
 //		}
 
-		protected void addDefs( List defs )
-		{
-			tm.addDefs( defs );
+		protected void addDefs(final List defs) {
+			tm.addDefs(defs);
 		}
-		
-		protected SynthDef getSelectedDef()
-		{
+
+		protected SynthDef getSelectedDef() {
 			final int row = getSelectedRow();
-			if( row >= 0 ) return tm.getDef( row );
+			if (row >= 0) return tm.getDef(row);
 			else return null;
 		}
 
-		protected List getDefs()
-		{
+		protected List getDefs() {
 			return tm.getDefs();
 		}
 	}
-	
-	private static class SynthDefTableModel
-	extends AbstractTableModel
-	{
+
+	private static class SynthDefTableModel extends AbstractTableModel {
+
 		private final List collDefs = new ArrayList();
 		private final String name;
 
-		protected SynthDefTableModel( String name )
-		{
+		protected SynthDefTableModel(final String name) {
 			super();
 			this.name = name;
 		}
-		
-		public String getColumnName( int col )
-		{
+
+		@Override
+		public String getColumnName(final int col) {
 			return name;
 		}
 
-		public int getRowCount()
-		{
+		@Override
+		public int getRowCount() {
 			return collDefs.size();
 		}
-		
-		public int getColumnCount()
-		{
+
+		@Override
+		public int getColumnCount() {
 			return 1;
 		}
-		
-		public Object getValueAt( int row, int column )
-		{
-			if( row < collDefs.size() ) {
-				return ((SynthDef) collDefs.get( row )).getName();
-			} else {
+
+		@Override
+		public Object getValueAt(final int row, final int column) {
+			if (row < collDefs.size()) {
+				return ((SynthDef) collDefs.get(row)).getName();
+			}
+			else {
 				return null;
 			}
 		}
@@ -523,18 +527,16 @@ implements FileFilter, ServerListener, Constants, PlugIn
 //			fireTableRowsInserted( collDefs.size() - 1, collDefs.size() - 1 );
 //		}
 
-		protected void addDefs( List defs )
-		{
-			if( defs.isEmpty() ) return;
-		
+		protected void addDefs(final List defs) {
+			if (defs.isEmpty()) return;
+
 			final int startRow = collDefs.size();
-			collDefs.addAll( defs );
-			fireTableRowsInserted( startRow, collDefs.size() - 1 );
+			collDefs.addAll(defs);
+			fireTableRowsInserted(startRow, collDefs.size() - 1);
 		}
 
-		protected SynthDef getDef( int idx )
-		{
-			return (SynthDef) collDefs.get( idx );
+		protected SynthDef getDef(final int idx) {
+			return (SynthDef) collDefs.get(idx);
 		}
 
 //		private int getNumDefs()
@@ -542,78 +544,71 @@ implements FileFilter, ServerListener, Constants, PlugIn
 //			return collDefs.size();
 //		}
 
-		protected List getDefs()
-		{
-			return new ArrayList( collDefs );
+		protected List getDefs() {
+			return new ArrayList(collDefs);
 		}
 	}
-	
-	private class ActionPlay
-	extends AbstractAction
-	{
-		protected ActionPlay()
-		{
-			super( "Play" );			
+
+	private class ActionPlay extends AbstractAction {
+
+		protected ActionPlay() {
+			super("Play");
 		}
-	
-		public void actionPerformed( ActionEvent e )
-		{
-			if( selectedTable == null ) return;
-			
-			final SynthDef	def		=  (SynthDef)defTables[0].getDefs().get(0);   	//selectedTable.getSelectedDef();
-			final Synth		synth;
-			
-			if( (def != null) && (grpAll != null) && (server != null) ) {
+
+		@Override
+		public void actionPerformed(final ActionEvent e) {
+			if (selectedTable == null) return;
+
+			final SynthDef def = (SynthDef) defTables[0].getDefs().get(0); // selectedTable.getSelectedDef();
+			final Synth synth;
+
+			if ((def != null) && (grpAll != null) && (server != null)) {
 				try {
-					synth	= Synth.basicNew( def.getName(), server );
-					if( nw != null ) nw.register( synth );
-					server.sendMsg( synth.newMsg( grpAll ));
+					synth = Synth.basicNew(def.getName(), server);
+					if (nw != null) nw.register(synth);
+					server.sendMsg(synth.newMsg(grpAll));
 				}
-				catch( IOException e1 ) {
-					JCollider.displayError( enc_this, e1, "Play" );
+				catch (final IOException e1) {
+					JCollider.displayError(enc_this, e1, "Play");
 				}
 			}
 		}
 	}
 
-	private class ActionStop
-	extends AbstractAction
-	{
-		protected ActionStop()
-		{
-			super( "Stop All" );
+	private class ActionStop extends AbstractAction {
+
+		protected ActionStop() {
+			super("Stop All");
 		}
-	
-		public void actionPerformed( ActionEvent e )
-		{
-			if( grpAll != null ) {
+
+		@Override
+		public void actionPerformed(final ActionEvent e) {
+			if (grpAll != null) {
 				try {
 					grpAll.freeAll();
 				}
-				catch( IOException e1 ) {
-					JCollider.displayError( enc_this, e1, "Stop" );
+				catch (final IOException e1) {
+					JCollider.displayError(enc_this, e1, "Stop");
 				}
 			}
 		}
 	}
-	
-	private class TableSelListener
-	implements ListSelectionListener
-	{
+
+	private class TableSelListener implements ListSelectionListener {
+
 		int idx;
-	
-		protected TableSelListener( int idx )
-		{
-			this.idx	= idx;
+
+		protected TableSelListener(final int idx) {
+			this.idx = idx;
 		}
 
-		public void valueChanged( ListSelectionEvent e )
-		{
-			if( defTables[ idx ].getSelectedRowCount() > 0 ) {
-				selectedTable = defTables[ idx ];
-				for( int i = 0; i < defTables.length; i++ ) {
-					if( (i != idx) && defTables[ i ].getSelectedRowCount() > 0 ) {
-						defTables[ i ].clearSelection();
+		@Override
+		public void valueChanged(final ListSelectionEvent e) {
+			if (defTables[idx].getSelectedRowCount() > 0) {
+				selectedTable = defTables[idx];
+				for (int i = 0; i < defTables.length; i++) {
+					if ((i != idx) && defTables[i].getSelectedRowCount() > 0) {
+						defTables[i].clearSelection();
 					}
 				}
 			}
@@ -638,7 +633,7 @@ implements FileFilter, ServerListener, Constants, PlugIn
 //			}
 //		}
 //	}
-	
+
 //	private class ActionDump
 //	extends AbstractAction
 //	{
@@ -698,80 +693,79 @@ implements FileFilter, ServerListener, Constants, PlugIn
 //		}
 //	}
 
-	private static class SynthDefNameComp
-	implements Comparator
-	{
-		protected SynthDefNameComp() { /* empty */ }
-		
-		public int compare( Object def1, Object def2 )
-		{
-			return( ((SynthDef) def1).getName().compareTo( ((SynthDef) def2).getName() ));
+	private static class SynthDefNameComp implements Comparator {
+
+		protected SynthDefNameComp() { /* empty */}
+
+		@Override
+		public int compare(final Object def1, final Object def2) {
+			return (((SynthDef) def1).getName()
+				.compareTo(((SynthDef) def2).getName()));
 		}
 	}
 
-	private class SynthDefFileTransferHandler
-	extends TransferHandler
-	{
+	private class SynthDefFileTransferHandler extends TransferHandler {
+
 		private final int idx;
-	
-		protected SynthDefFileTransferHandler( int idx )
-		{
+
+		protected SynthDefFileTransferHandler(final int idx) {
 			this.idx = idx;
 		}
 
 		/**
 		 * Overridden to import a Pathname if it is available.
 		 */
-		public boolean importData( JComponent c, Transferable t )
-		{
-			final Object			o;
-			final List				fileList;
-			final List				collDefs;
-			File					f;
-			SynthDef[]				defs;
-		
+		@Override
+		public boolean importData(final JComponent c, final Transferable t) {
+			final Object o;
+			final List fileList;
+			final List collDefs;
+			File f;
+			SynthDef[] defs;
+
 			try {
-				if( t.isDataFlavorSupported( DataFlavor.javaFileListFlavor )) {
-					o =  t.getTransferData( DataFlavor.javaFileListFlavor );
-					if( o instanceof List ) {
-						fileList	= (List) o;
-						collDefs	= new ArrayList();
-						for( int i = 0; i < fileList.size(); i++ ) {
-							f = (File) fileList.get( i );
+				if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+					o = t.getTransferData(DataFlavor.javaFileListFlavor);
+					if (o instanceof List) {
+						fileList = (List) o;
+						collDefs = new ArrayList();
+						for (int i = 0; i < fileList.size(); i++) {
+							f = (File) fileList.get(i);
 							try {
-								if( SynthDef.isDefFile( f )) {
-									defs = SynthDef.readDefFile( f );
-									for( int j = 0; j < defs.length; j++ ) {
-										collDefs.add( defs[ j ]);
+								if (SynthDef.isDefFile(f)) {
+									defs = SynthDef.readDefFile(f);
+									for (int j = 0; j < defs.length; j++) {
+										collDefs.add(defs[j]);
 									}
-								} else {
-									System.err.println( "Not a synth def file : " + f.getName() );
+								}
+								else {
+									System.err.println("Not a synth def file : " + f.getName());
 								}
 							}
-							catch( IOException e1 ) {
-								JCollider.displayError( enc_this, e1, "Drop File" );
+							catch (final IOException e1) {
+								JCollider.displayError(enc_this, e1, "Drop File");
 							}
 						}
-						if( !collDefs.isEmpty() ) {
-							Collections.sort( collDefs, synthDefNameComp );
-							defTables[ idx ].addDefs( collDefs );
+						if (!collDefs.isEmpty()) {
+							Collections.sort(collDefs, synthDefNameComp);
+							defTables[idx].addDefs(collDefs);
 							return true;
 						}
 					}
 				}
 			}
-			catch( UnsupportedFlavorException e1 ) { /* ignored */ }
-			catch( IOException e2 ) {
-				JCollider.displayError( enc_this, e2, "Drop File" );
+			catch (final UnsupportedFlavorException e1) { /* ignored */}
+			catch (final IOException e2) {
+				JCollider.displayError(enc_this, e2, "Drop File");
 			}
 
 			return false;
 		}
-		
-		public boolean canImport( JComponent c, DataFlavor[] flavors )
-		{
-			for( int i = 0; i < flavors.length; i++ ) {
-				if( flavors[i].equals( DataFlavor.javaFileListFlavor )) return true;
+
+		@Override
+		public boolean canImport(final JComponent c, final DataFlavor[] flavors) {
+			for (int i = 0; i < flavors.length; i++) {
+				if (flavors[i].equals(DataFlavor.javaFileListFlavor)) return true;
 			}
 			return false;
 		}

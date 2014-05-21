@@ -80,10 +80,14 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	Constants, PlugIn
 {
 
+	// -- Constants --
+
 	private static final SynthDefNameComp SYNTH_DEF_NAME_COMP =
 		new SynthDefNameComp();
 
 	private static final String[] TABLE_NAMES = { "JCollider" };
+
+	// -- Fields --
 
 	private final SynthDefTable[] defTables = new SynthDefTable[1];
 	private SynthDefTable selectedTable = null;
@@ -97,6 +101,8 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	public Sonification() {
 		super("Sonification");
 	}
+
+	// -- Sonification methods --
 
 	public void initialize() {
 		final Box b = Box.createHorizontalBox();
@@ -201,6 +207,80 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		toFront();
 	}
 
+	// -- PlugIn methods --
+
+	@Override
+	public void run(final String arg) {
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				initialize();
+			}
+		});
+
+	}
+
+	// -- FileFilter methods --
+
+	@Override
+	public boolean accept(final File f) {
+		try {
+			return SynthDef.isDefFile(f);
+		}
+		catch (final IOException e1) {
+			return false;
+		}
+	}
+
+	// -- ServerListener methods --
+
+	@Override
+	public void serverAction(final ServerEvent e) {
+		switch (e.getID()) {
+			case ServerEvent.RUNNING:
+				try {
+					initServer();
+				}
+				catch (final IOException e1) {
+					reportError(e1);
+				}
+				break;
+
+			case ServerEvent.STOPPED:
+				// re-run alive thread
+				final javax.swing.Timer t =
+					new javax.swing.Timer(1000, new ActionListener() {
+
+						@Override
+						public void actionPerformed(final ActionEvent evt) {
+							try {
+								if (server != null) server.startAliveThread();
+							}
+							catch (final IOException e1) {
+								reportError(e1);
+							}
+						}
+					});
+				t.setRepeats(false);
+				t.start();
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	// -- Main method --
+
+	public static void main(final String args[]) {
+		System.out.println("Path=" + System.getenv("PATH"));
+		new ImageJ();
+		new Sonification().run("");
+	}
+
+	// -- Helper methods --
+
 	private JComponent createButtons() {
 		final Box b = Box.createHorizontalBox();
 		JButton but;
@@ -215,20 +295,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		return b;
 	}
 
-	@Override
-	public void run(final String arg) {
-		SwingUtilities.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				initialize();
-			}
-		});
-
-	}
-
 	private void createDefs() {
-
 		IJ.log("Creating Defs");
 		try {
 			UGenInfo.readBinaryDefinitions();
@@ -284,69 +351,12 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		return null;
 	}
 
-	public static void main(final String args[]) {
-		System.out.println("Path=" + System.getenv("PATH"));
-		new ImageJ();
-		new Sonification().run("");
-
-	}
-
 	private static void reportError(final Exception e) {
 		System.err
 			.println(e.getClass().getName() + " : " + e.getLocalizedMessage());
 	}
 
-	// ------------- ServerListener interface -------------
-
-	@Override
-	public void serverAction(final ServerEvent e) {
-		switch (e.getID()) {
-			case ServerEvent.RUNNING:
-				try {
-					initServer();
-				}
-				catch (final IOException e1) {
-					reportError(e1);
-				}
-				break;
-
-			case ServerEvent.STOPPED:
-				// re-run alive thread
-				final javax.swing.Timer t =
-					new javax.swing.Timer(1000, new ActionListener() {
-
-						@Override
-						public void actionPerformed(final ActionEvent evt) {
-							try {
-								if (server != null) server.startAliveThread();
-							}
-							catch (final IOException e1) {
-								reportError(e1);
-							}
-						}
-					});
-				t.setRepeats(false);
-				t.start();
-				break;
-
-			default:
-				break;
-		}
-	}
-
-	// ------------- FileFilter interface -------------
-
-	@Override
-	public boolean accept(final File f) {
-		try {
-			return SynthDef.isDefFile(f);
-		}
-		catch (final IOException e1) {
-			return false;
-		}
-	}
-
-	// ------------- internal classes -------------
+	// -- Helper classes --
 
 	private abstract static class SonificationDefs {
 
@@ -595,4 +605,5 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			return false;
 		}
 	} // class PathTransferHandler
+
 }

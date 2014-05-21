@@ -87,7 +87,8 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	protected final SynthDefTable[] defTables = new SynthDefTable[1];
 	protected SynthDefTable selectedTable = null;
 
-	protected static final Comparator synthDefNameComp = new SynthDefNameComp();
+	protected static final SynthDefNameComp synthDefNameComp =
+		new SynthDefNameComp();
 
 	protected Server server = null;
 	protected NodeWatcher nw = null;
@@ -236,7 +237,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		try {
 			UGenInfo.readBinaryDefinitions();
 
-			final List collDefs = SonificationDefs.create();
+			final List<SynthDef> collDefs = SonificationDefs.create();
 			Collections.sort(collDefs, synthDefNameComp);
 			defTables[0].addDefs(collDefs);
 		}
@@ -259,13 +260,13 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	}
 
 	private void sendDefs() {
-		List defs;
+		List<SynthDef> defs;
 		SynthDef def;
 
 		for (int i = 0; i < defTables.length; i++) {
 			defs = defTables[i].getDefs();
 			for (int j = 0; j < defs.size(); j++) {
-				def = (SynthDef) defs.get(j);
+				def = defs.get(j);
 				try {
 					def.send(server);
 				}
@@ -353,11 +354,11 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 	private abstract static class SonificationDefs {
 
-		private static java.util.List create()
+		private static List<SynthDef> create()
 
 		{
 			IJ.log("Creating Defs Part 2");
-			final java.util.List result = new ArrayList();
+			final List<SynthDef> result = new ArrayList<SynthDef>();
 			final Random rnd = new Random(System.currentTimeMillis());
 			SynthDef def;
 			GraphElem f, g, h;
@@ -402,7 +403,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		}
 
-		protected void addDefs(final List defs) {
+		protected void addDefs(final List<? extends SynthDef> defs) {
 			tm.addDefs(defs);
 		}
 
@@ -412,14 +413,14 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			else return null;
 		}
 
-		protected List getDefs() {
+		protected List<SynthDef> getDefs() {
 			return tm.getDefs();
 		}
 	}
 
 	private static class SynthDefTableModel extends AbstractTableModel {
 
-		private final List collDefs = new ArrayList();
+		private final List<SynthDef> collDefs = new ArrayList<SynthDef>();
 		private final String name;
 
 		protected SynthDefTableModel(final String name) {
@@ -445,14 +446,14 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		@Override
 		public Object getValueAt(final int row, final int column) {
 			if (row < collDefs.size()) {
-				return ((SynthDef) collDefs.get(row)).getName();
+				return (collDefs.get(row)).getName();
 			}
 			else {
 				return null;
 			}
 		}
 
-		protected void addDefs(final List defs) {
+		protected void addDefs(final List<? extends SynthDef> defs) {
 			if (defs.isEmpty()) return;
 
 			final int startRow = collDefs.size();
@@ -461,11 +462,11 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		}
 
 		protected SynthDef getDef(final int idx) {
-			return (SynthDef) collDefs.get(idx);
+			return collDefs.get(idx);
 		}
 
-		protected List getDefs() {
-			return new ArrayList(collDefs);
+		protected List<SynthDef> getDefs() {
+			return new ArrayList<SynthDef>(collDefs);
 		}
 	}
 
@@ -479,7 +480,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		public void actionPerformed(final ActionEvent e) {
 			if (selectedTable == null) return;
 
-			final SynthDef def = (SynthDef) defTables[0].getDefs().get(0); // selectedTable.getSelectedDef();
+			final SynthDef def = defTables[0].getDefs().get(0); // selectedTable.getSelectedDef();
 			final Synth synth;
 
 			if ((def != null) && (grpAll != null) && (server != null)) {
@@ -535,14 +536,13 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		}
 	}
 
-	private static class SynthDefNameComp implements Comparator {
+	private static class SynthDefNameComp implements Comparator<SynthDef> {
 
 		protected SynthDefNameComp() { /* empty */}
 
 		@Override
-		public int compare(final Object def1, final Object def2) {
-			return (((SynthDef) def1).getName()
-				.compareTo(((SynthDef) def2).getName()));
+		public int compare(final SynthDef def1, final SynthDef def2) {
+			return def1.getName().compareTo(def2.getName());
 		}
 	}
 
@@ -560,8 +560,8 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		@Override
 		public boolean importData(final JComponent c, final Transferable t) {
 			final Object o;
-			final List fileList;
-			final List collDefs;
+			final List<File> fileList;
+			final List<SynthDef> collDefs;
 			File f;
 			SynthDef[] defs;
 
@@ -569,10 +569,10 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 				if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
 					o = t.getTransferData(DataFlavor.javaFileListFlavor);
 					if (o instanceof List) {
-						fileList = (List) o;
-						collDefs = new ArrayList();
+						fileList = (List<File>) o;
+						collDefs = new ArrayList<SynthDef>();
 						for (int i = 0; i < fileList.size(); i++) {
-							f = (File) fileList.get(i);
+							f = fileList.get(i);
 							try {
 								if (SynthDef.isDefFile(f)) {
 									defs = SynthDef.readDefFile(f);

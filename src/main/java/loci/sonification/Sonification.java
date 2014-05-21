@@ -81,19 +81,19 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	Constants, PlugIn
 {
 
+	private static final SynthDefNameComp SYNTH_DEF_NAME_COMP =
+		new SynthDefNameComp();
+
+	private static final String[] TABLE_NAMES = { "JCollider" };
+
 	public static Font fntGUI = ServerPanel.fntGUI;
 
 	private final SynthDefTable[] defTables = new SynthDefTable[1];
 	private SynthDefTable selectedTable = null;
 
-	private static final SynthDefNameComp synthDefNameComp =
-		new SynthDefNameComp();
-
 	private Server server = null;
 	private NodeWatcher nw = null;
 	private Group grpAll;
-
-	private static final String[] tableNames = { "JCollider" };
 
 	private final Sonification enc_this = this;
 
@@ -112,7 +112,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		JFrame spf = null;
 
 		for (int i = 0; i < 1; i++) {
-			defTables[i] = new SynthDefTable(tableNames[i]);
+			defTables[i] = new SynthDefTable(TABLE_NAMES[i]);
 			ggScroll = new JScrollPane(defTables[i]);
 			b.add(ggScroll);
 			defTables[i].getSelectionModel().addListSelectionListener(
@@ -237,7 +237,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			UGenInfo.readBinaryDefinitions();
 
 			final List<SynthDef> collDefs = SonificationDefs.create();
-			Collections.sort(collDefs, synthDefNameComp);
+			Collections.sort(collDefs, SYNTH_DEF_NAME_COMP);
 			defTables[0].addDefs(collDefs);
 		}
 		catch (final IOException e1) {
@@ -575,7 +575,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 							}
 						}
 						if (!collDefs.isEmpty()) {
-							Collections.sort(collDefs, synthDefNameComp);
+							Collections.sort(collDefs, SYNTH_DEF_NAME_COMP);
 							defTables[idx].addDefs(collDefs);
 							return true;
 						}

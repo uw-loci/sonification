@@ -87,7 +87,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 	private static final String[] TABLE_NAMES = { "JCollider" };
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	// -- Fields --
 

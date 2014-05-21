@@ -54,19 +54,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-						<descriptor>src/main/assembly/deps.xml</descriptor>
-					</descriptors>
-					<archive>
-						<manifest>
-							<mainClass>loci.sonification.Sonification</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<configuration>

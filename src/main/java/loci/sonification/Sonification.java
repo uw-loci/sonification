@@ -24,6 +24,7 @@
 package loci.sonification;
 
 import de.sciss.jcollider.Constants;
+import de.sciss.jcollider.Control;
 import de.sciss.jcollider.GraphElem;
 import de.sciss.jcollider.Group;
 import de.sciss.jcollider.JCollider;
@@ -34,10 +35,13 @@ import de.sciss.jcollider.ServerListener;
 import de.sciss.jcollider.Synth;
 import de.sciss.jcollider.SynthDef;
 import de.sciss.jcollider.UGen;
+import de.sciss.jcollider.UGenChannel;
 import de.sciss.jcollider.UGenInfo;
 import de.sciss.jcollider.gui.ServerPanel;
+import de.sciss.net.OSCBundle;
 import ij.IJ;
 import ij.ImageJ;
+import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
 import java.awt.BorderLayout;
@@ -76,6 +80,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
+
+
 public class Sonification extends JFrame implements FileFilter, ServerListener,
 	Constants, PlugIn
 {
@@ -93,7 +99,11 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 	private final SynthDefTable[] defTables = new SynthDefTable[1];
 	private SynthDefTable selectedTable = null;
-
+	
+	private List<SynthDef> MemoryDefCollection = new ArrayList<SynthDef>(); 
+	
+	
+	private Synth synth = null;
 	private Server server = null;
 	private NodeWatcher nw = null;
 	private Group grpAll;
@@ -107,6 +117,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	// -- Sonification methods --
 
 	public void initialize() {
+		
 		final Box b = Box.createHorizontalBox();
 		final Box b2 = Box.createHorizontalBox();
 		final Container cp = getContentPane();
@@ -116,17 +127,17 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		JLabel lb;
 		JFrame spf = null;
 
-		for (int i = 0; i < 1; i++) {
-			defTables[i] = new SynthDefTable(TABLE_NAMES[i]);
-			ggScroll = new JScrollPane(defTables[i]);
-			b.add(ggScroll);
-			defTables[i].getSelectionModel().addListSelectionListener(
-				new TableSelListener(i));
-			if (i == 1) {
-				ggScroll.setTransferHandler(new SynthDefFileTransferHandler(1));
-				ggScroll.setToolTipText("Drop SynthDef Files from the Finder here");
-			}
-		}
+//		for (int i = 0; i < 1; i++) {
+//			defTables[i] = new SynthDefTable(TABLE_NAMES[i]);
+//			ggScroll = new JScrollPane(defTables[i]);
+//			b.add(ggScroll);
+//			defTables[i].getSelectionModel().addListSelectionListener(
+//				new TableSelListener(i));
+////			if (i == 1) {
+////				ggScroll.setTransferHandler(new SynthDefFileTransferHandler(1));
+////				ggScroll.setToolTipText("Drop SynthDef Files from the Finder here");
+////			}
+//		}
 
 		try {
 			cp.setLayout(new BorderLayout());
@@ -178,6 +189,7 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 		addWindowListener(new WindowAdapter() {
 
+				
 			@Override
 			public void windowClosing(final WindowEvent e) {
 				if (nw != null) {
@@ -278,7 +290,13 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	public static void main(final String args[]) {
 		System.out.println("Path=" + System.getenv("PATH"));
 		new ImageJ();
+		
 		new Sonification().run("");
+	    //GenericDialog gd = new GenericDialog("New Image");
+	    //.addStringField("Title: ", title);
+	    //gd.addNumericField("Width: ", width, 0);
+	    //gd.addNumericField("Height: ", height, 0);
+	    //gd.showDialog();
 	}
 
 	// -- Helper methods --
@@ -293,6 +311,8 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		but = new JButton(new ActionStop());
 		but.setToolTipText("Stop All Synths");
 		b.add(but);
+		but = new JButton(new ActionTune());
+		b.add(but);
 
 		return b;
 	}
@@ -302,10 +322,17 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 		try {
 			UGenInfo.readBinaryDefinitions();
 
-			final List<SynthDef> collDefs = new ArrayList<SynthDef>();
-			collDefs.add(jSampleAndHoldLiquid());
-			Collections.sort(collDefs, SYNTH_DEF_NAME_COMP);
-			defTables[0].addDefs(collDefs);
+			//final List<SynthDef> collDefs = new ArrayList<SynthDef>();
+			//collDefs.add(jSampleAndHoldLiquid());
+			
+			
+			//Collections.sort(collDefs, SYNTH_DEF_NAME_COMP);
+			
+			
+			//MemoryDefCollection.add(jSampleAndHoldLiquid());
+			//MemoryDefCollection.add(sinSummationTest());
+			MemoryDefCollection.add(harmonicAMTest());
+			//defTables[0].addDefs(collDefs);
 		}
 		catch (final IOException e1) {
 			reportError(e1);
@@ -326,20 +353,32 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	}
 
 	private void sendDefs() {
-		List<SynthDef> defs;
-		SynthDef def;
+		
+//		List<SynthDef> defs;
+//		SynthDef def;
 
-		for (int i = 0; i < defTables.length; i++) {
-			defs = defTables[i].getDefs();
-			for (int j = 0; j < defs.size(); j++) {
-				def = defs.get(j);
-				try {
-					def.send(server);
-				}
-				catch (final IOException e1) {
-					System.err.println("Sending Def " + def.getName() + " : " +
-						e1.getClass().getName() + " : " + e1.getLocalizedMessage());
-				}
+//		for (int i = 0; i < defTables.length; i++) 
+//		{
+//			defs = defTables[i].getDefs();
+//			for (int j = 0; j < defs.size(); j++) {
+//				def = defs.get(j);
+//				try {
+//					def.send(server);
+//				}
+//				catch (final IOException e1) {
+//					System.err.println("Sending Def " + def.getName() + " : " +
+//						e1.getClass().getName() + " : " + e1.getLocalizedMessage());
+//				}
+//			}
+//		}
+		System.out.println("Memory list size:" + MemoryDefCollection.size());
+		
+		for(SynthDef t : MemoryDefCollection) {
+			try {
+				t.send(server);
+			}
+			catch (final IOException e1){
+				System.err.println("Sending Def " + t.getName() + " : " + e1.getClass().getName() + " : " + e1.getLocalizedMessage());
 			}
 		}
 	}
@@ -357,28 +396,146 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 	private static void reportError(final Exception e) {
 		IJ.handleException(e);
 	}
+	
 
-	private static SynthDef jSampleAndHoldLiquid() {
-		final GraphElem clockRate =
-			UGen.kr("MouseX", UGen.ir(1), UGen.ir(200), UGen.ir(1));
-		final GraphElem clockTime = UGen.kr("reciprocal", clockRate);
-		final GraphElem clock = UGen.kr("Impulse", clockRate, UGen.ir(0.4f));
-		final GraphElem centerFreq =
-			UGen.kr("MouseY", UGen.ir(100), UGen.ir(8000), UGen.ir(1));
-		final GraphElem freq =
-			UGen.kr("Latch", UGen.kr("MulAdd", UGen.kr("WhiteNoise"), UGen.kr("*",
-				centerFreq, UGen.ir(0.5f)), centerFreq), clock);
-		final GraphElem panPos = UGen.kr("Latch", UGen.kr("WhiteNoise"), clock);
+//	private static SynthDef jSampleAndHoldLiquid() {
+//		final GraphElem clockRate =
+//			UGen.kr("MouseX", UGen.ir(1), UGen.ir(200), UGen.ir(1));
+//		final GraphElem clockTime = UGen.kr("reciprocal", clockRate);
+//		final GraphElem clock = UGen.kr("Impulse", clockRate, UGen.ir(0.4f));
+//		final GraphElem centerFreq =
+//			UGen.kr("MouseY", UGen.ir(100), UGen.ir(8000), UGen.ir(1));
+//		final GraphElem freq =
+//			UGen.kr("Latch", UGen.kr("MulAdd", UGen.kr("WhiteNoise"), UGen.kr("*",
+//				centerFreq, UGen.ir(0.5f)), centerFreq), clock);
+//		final GraphElem panPos = UGen.kr("Latch", UGen.kr("WhiteNoise"), clock);
+//
+//		final GraphElem f =
+//			UGen
+//				.ar("*", UGen.ar("SinOsc", freq), UGen.kr("Decay2", clock, UGen.kr("*",
+//					UGen.ir(0.1f), clockTime), UGen.kr("*", UGen.ir(0.9f), clockTime)));
+//		final GraphElem g = UGen.ar("Pan2", f, panPos);
+//		final GraphElem h =
+//			UGen.ar("CombN", g, UGen.ir(0.3f), UGen.ir(0.3f), UGen.ir(2));
+//		return new SynthDef("JSampleAndHoldLiquid", UGen.ar("Out", UGen.ir(0), h));
+//	}
+	
+	private static SynthDef sinSummationTest() {
+		
+		Control[] controlz = new Control[15];
+		UGenChannel[] channelz = new UGenChannel[15];
+		
+		//OSCBundle x
+		
+		//14 higher notes
+		float[] freqlist = {440f, 466.16f, 493.88f, 523.25f, 554.37f, 587.33f, 622.25f, 659.26f, 698.46f, 739.99f, 783.99f, 830.61f, 880f, 932.33f, 987.77f};
+		//Base note A440
+		GraphElem combowave = null; 
+		//= UGen.ar("SinOsc", UGen.ir(440));
+		int i = 0;
+		for (float num : freqlist) {
+			
+			controlz[i] = Control.kr(new String[] {"ch"+i}, new float[] {0.05f});
+			channelz[i] = controlz[i].getChannel(0);
+			
+			combowave = (combowave==null) ? 
+					UGen.ar("*", UGen.ar("SinOsc", UGen.ir(num)), channelz[i]) : 
+						UGen.ar("+", combowave, UGen.ar("*", UGen.ar("SinOsc", UGen.ir(num)), channelz[i]));
+			i++;
+			
+			//combowave = UGen.ar("+", combowave, UGen.ar("*", UGen.ar("SinOsc", UGen.ir(num)), UGen.ir(0.05f)));
+			
+		}
+		
+		//final GraphElem ch1 = UGen.ar("SinOsc", UGen.ir(440));
+		
 
-		final GraphElem f =
-			UGen
-				.ar("*", UGen.ar("SinOsc", freq), UGen.kr("Decay2", clock, UGen.kr("*",
-					UGen.ir(0.1f), clockTime), UGen.kr("*", UGen.ir(0.9f), clockTime)));
-		final GraphElem g = UGen.ar("Pan2", f, panPos);
-		final GraphElem h =
-			UGen.ar("CombN", g, UGen.ir(0.3f), UGen.ir(0.3f), UGen.ir(2));
-		return new SynthDef("JSampleAndHoldLiquid", UGen.ar("Out", UGen.ir(0), h));
+		//final GraphElem ch2 = UGen.ar("SinOsc", UGen.ir(466.16f));
+		
+		//final GraphElem combo = UGen.ar("+", ch1, ch2);
+		final GraphElem ch1stereo = UGen.array(combowave, combowave);
+		
+		
+		/*GraphElem f	= UGen.ar( "*", UGen.ar( "LFPulse", 
+				UGen.kr( "MulAdd", UGen.kr( "FSinOsc", UGen.ir( 0.05f ), UGen.ir( 0 )), UGen.ir( 80 ), UGen.ir( 160 )),
+					UGen.ir( 0 ), UGen.ir( 0.4f )), UGen.ir( 0.05f ));*/
+		
+//		GraphElem f	= UGen.ar( "RLPF", UGen.ar("SinOsc", UGen.ir(440)), UGen.kr( "MulAdd",
+//						UGen.kr( "FSinOsc", UGen.array( UGen.ir( 0.6f ), UGen.ir( 0.7f )), UGen.ir( 0 )), UGen.ir( 3600 ), UGen.ir( 4000 )),
+//							UGen.ir( 0.2f ));	
+		
+		/*UGen.ar( "*", UGen.ar( "LFPulse", 
+				UGen.kr( "MulAdd", UGen.kr( "FSinOsc", UGen.ir( 0.05f ), UGen.ir( 0 )), UGen.ir( 80 ), UGen.ir( 160 )),
+					UGen.ir( 0 ), UGen.ir( 0.4f )), UGen.ir( 0.05f ))*/
+		
+			//def = new SynthDef( "JPulseModulation", UGen.ar( "Out", UGen.ir( 0 ), f ));
+		
+		return new SynthDef("sinSummationTest", UGen.ar("Out",UGen.ir(0),ch1stereo));
 	}
+	
+	
+	private static SynthDef harmonicAMTest() {
+		
+		
+		Control[] controlz = new Control[15];
+		UGenChannel[] channelz = new UGenChannel[15];
+		
+		float[] freqlist = {300f, 600f, 900f, 1200f, 1500f, 1800f, 2100f, 2400f, 2700f, 3000f, 3300f, 3600f, 3900f, 4200f, 4500f};
+		//Base note A440
+		GraphElem combowave = null; 
+		//= UGen.ar("SinOsc", UGen.ir(440));
+		int i = 0;
+		for (float num : freqlist) {
+			
+			controlz[i] = Control.kr(new String[] {"ch"+i}, new float[] {0.05f});
+			channelz[i] = controlz[i].getChannel(0);
+			
+			combowave = (combowave==null) ? 
+					UGen.ar("*", UGen.ar("SinOsc", UGen.ir(num)), channelz[i]) : 
+						UGen.ar("+", combowave, UGen.ar("*", UGen.ar("SinOsc", UGen.ir(num)), channelz[i]));
+			i++;
+			
+			//combowave = UGen.ar("+", combowave, UGen.ar("*", UGen.ar("SinOsc", UGen.ir(num)), UGen.ir(0.05f)));
+			
+		}
+		
+		final GraphElem ch1stereo = UGen.array(combowave, combowave);
+		
+		return new SynthDef("harmonicTest", UGen.ar("Out",UGen.ir(0),ch1stereo));
+		
+	}
+	
+	private static SynthDef harmonicFMTest() {
+		
+		
+		Control[] controlz = new Control[15];
+		UGenChannel[] channelz = new UGenChannel[15];
+		
+		float[] freqlist = {300f, 600f, 900f, 1200f, 1500f, 1800f, 2100f, 2400f, 2700f, 3000f, 3300f, 3600f, 3900f, 4200f, 4500f};
+		//Base note A440
+		GraphElem combowave = null; 
+		//= UGen.ar("SinOsc", UGen.ir(440));
+		int i = 0;
+		for (float num : freqlist) {
+			
+			controlz[i] = Control.kr(new String[] {"ch"+i}, new float[] {0.05f});
+			channelz[i] = controlz[i].getChannel(0);
+			
+			combowave = (combowave==null) ? 
+					UGen.ar("*", UGen.ar("SinOsc", UGen.ir(num)), channelz[i]) : 
+						UGen.ar("+", combowave, UGen.ar("*", UGen.ar("SinOsc", UGen.ir(num)), channelz[i]));
+			i++;
+			
+			//combowave = UGen.ar("+", combowave, UGen.ar("*", UGen.ar("SinOsc", UGen.ir(num)), UGen.ir(0.05f)));
+			
+		}
+		
+		final GraphElem ch1stereo = UGen.array(combowave, combowave);
+		
+		return new SynthDef("harmonicTest", UGen.ar("Out",UGen.ir(0),ch1stereo));
+		
+	}	
+	
 
 	// -- Helper classes --
 
@@ -448,6 +605,42 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 			return new ArrayList<SynthDef>(collDefs);
 		}
 	}
+	
+	private class ActionTune extends AbstractAction {
+		
+		private ActionTune() {
+			super("Tune");
+		}
+		
+		@Override
+		public void actionPerformed(final ActionEvent e) {
+			
+			//SynthDef tunedef = MemoryDefCollection.get(0);
+			//Synth tunesynth;
+			
+			
+			if(synth !=null && server!=null) {
+				try {
+					OSCBundle bndl = new OSCBundle(System.currentTimeMillis());
+					bndl.addPacket(synth.setMsg("ch0",0.5f));
+					server.sendBundle(bndl);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+//			if(tunedef != null && grpAll != null && server!= null)
+//				try {
+//					tunesynth = Synth.basicNew(tunedef.getName(), server);
+//					
+//					//def.send(server, MemoryDefCollection.)
+//				}
+//				catch(IOException e2) {
+//					System.err.println(e2);
+//					
+//				}
+		}
+	}
 
 	private class ActionPlay extends AbstractAction {
 
@@ -457,10 +650,11 @@ public class Sonification extends JFrame implements FileFilter, ServerListener,
 
 		@Override
 		public void actionPerformed(final ActionEvent e) {
-			if (selectedTable == null) return;
+			//if (selectedTable == null) return;
 
-			final SynthDef def = defTables[0].getDefs().get(0);
-			final Synth synth;
+			//final SynthDef def = defTables[0].getDefs().get(0);
+			final SynthDef def = MemoryDefCollection.get(0);
+			
 
 			if (def != null && grpAll != null && server != null) {
 				try {

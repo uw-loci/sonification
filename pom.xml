@@ -6,12 +6,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>loci</groupId>
-		<artifactId>pom-loci</artifactId>
-		<version>2.0.0</version>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>14.0.0</version>
 		<relativePath />
 	</parent>
 
+	<groupId>loci</groupId>
 	<artifactId>sonification_</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 
@@ -19,7 +20,10 @@
 	<description>An ImageJ plugin for listening to your images.</description>
 	<url>http://loci.wisc.edu/software/sonification</url>
 	<inceptionYear>2014</inceptionYear>
-
+	<organization>
+		<name>LOCI</name>
+		<url>https://loci.wisc.edu/</url>
+	</organization>
 	<licenses>
 		<license>
 			<name>GNU General Public License v2+</name>
@@ -27,54 +31,6 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
-	<dependencies>
-		<dependency>
-			<groupId>de.sciss</groupId>
-			<artifactId>jcollider</artifactId>
-			<version>0.38-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>ij</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jfree</groupId>
-			<artifactId>jfreechart</artifactId>
-		</dependency>
-	</dependencies>
-
-	<properties>
-		<enforcer.skip>true</enforcer.skip>
-	</properties>
-
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>loci.sonification.Sonification</mainClass>
-							<packageName>loci.sonification</packageName>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>net.imagej</groupId>
-				<artifactId>imagej-maven-plugin</artifactId>
-				<version>0.5.2</version>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<configuration>
-					<licenseName>gpl_v2</licenseName>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
 	<developers>
 		<developer>
@@ -104,12 +60,41 @@
 		</developer>
 	</developers>
 
+	<mailingLists>
+		<mailingList>
+			<name>LOCI Software</name>
+			<subscribe>https://loci.wisc.edu/mailman/listinfo/loci-software</subscribe>
+			<unsubscribe>https://loci.wisc.edu/mailman/listinfo/loci-software</unsubscribe>
+			<post>loci-software@loci.wisc.edu</post>
+			<archive>https://loci.wisc.edu/pipermail/loci-software/</archive>
+		</mailingList>
+	</mailingLists>
+
 	<scm>
 		<connection>scm:git:git://github.com/uw-loci/sonification</connection>
 		<developerConnection>scm:git:git@github.com:uw-loci/sonification</developerConnection>
 		<tag>HEAD</tag>
 		<url>https://github.com/uw-loci/sonification</url>
 	</scm>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/uw-loci/sonification/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>Travis CI</system>
+		<url>https://travis-ci.org/uw-loci/sonification</url>
+	</ciManagement>
+
+	<properties>
+		<main-class>loci.sonification.Sonification</main-class>
+		<package-name>loci.sonification</package-name>
+		<license.licenseName>gpl_v2</license.licenseName>
+		<license.copyrightOwners>Board of Regents of the University of
+Wisconsin-Madison.</license.copyrightOwners>
+		<license.projectName>Sonification plugin for listening to your images.</license.projectName>
+		<jcollider.version>0.38-SNAPSHOT</jcollider.version>
+		<enforcer.skip>true</enforcer.skip>
+	</properties>
 
 	<repositories>
 		<repository>
@@ -118,4 +103,19 @@
 		</repository>
 	</repositories>
 
+	<dependencies>
+		<dependency>
+			<groupId>de.sciss</groupId>
+			<artifactId>jcollider</artifactId>
+			<version>${jcollider.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>ij</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jfree</groupId>
+			<artifactId>jfreechart</artifactId>
+		</dependency>
+	</dependencies>
 </project>

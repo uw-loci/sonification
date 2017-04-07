@@ -34,31 +34,23 @@
 
 	<developers>
 		<developer>
-			<id>invizibility</id>
-			<name>Aprameya Mysore</name>
-			<email>amysore@wisc.edu</email>
-			<url>http://loci.wisc.edu/people/aprameya-mysore</url>
-			<organization>UW-Madison LOCI</organization>
-			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
-			<roles>
-				<role>developer</role>
-			</roles>
-			<timezone>-6</timezone>
-		</developer>
-		<developer>
 			<id>ctrueden</id>
 			<name>Curtis Rueden</name>
-			<email>ctrueden@wisc.edu</email>
-			<url>http://loci.wisc.edu/people/curtis-rueden</url>
-			<organization>UW-Madison LOCI</organization>
-			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
+			<url>https://imagej.net/User:Rueden</url>
 			<roles>
-				<role>architect</role>
-				<role>developer</role>
+				<role>founder</role>
+				<role>lead</role>
+				<role>maintainer</role>
 			</roles>
-			<timezone>-6</timezone>
 		</developer>
 	</developers>
+	<contributors>
+		<contributor>
+			<name>Aprameya Mysore</name>
+			<roles><role>founder</role></roles>
+			<properties><id>invizibility</id></properties>
+		</contributor>
+	</contributors>
 
 	<mailingLists>
 		<mailingList>

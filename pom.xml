@@ -86,6 +86,9 @@ Wisconsin-Madison.</license.copyrightOwners>
 		<license.projectName>Sonification plugin for listening to your images.</license.projectName>
 		<jcollider.version>0.38-SNAPSHOT</jcollider.version>
 		<enforcer.skip>true</enforcer.skip>
+
+		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
+		<releaseProfiles>deploy-to-imagej</releaseProfiles>
 	</properties>
 
 	<repositories>
